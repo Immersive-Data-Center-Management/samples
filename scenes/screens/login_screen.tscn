@@ -1,0 +1,72 @@
+[gd_scene format=3 uid="uid://g4m0hhim3kcu"]
+
+[ext_resource type="Script" uid="uid://fdua7xxunk5b" path="res://scripts/screens/login_screen.gd" id="1"]
+
+[node name="LoginScreen" type="Control" unique_id=883226785]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1022549532]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 200
+theme_override_constants/margin_top = 150
+theme_override_constants/margin_right = 200
+theme_override_constants/margin_bottom = 150
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1049344955]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=984118952]
+layout_mode = 2
+text = "BaSyx Login"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UrlLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=40803613]
+layout_mode = 2
+text = "Server URL"
+
+[node name="UrlInput" type="LineEdit" parent="MarginContainer/VBoxContainer" unique_id=1529758792]
+layout_mode = 2
+text = "http://127.0.0.1:8081"
+placeholder_text = "Enter server URL"
+
+[node name="UsernameLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1067035016]
+layout_mode = 2
+text = "Username"
+
+[node name="UsernameInput" type="LineEdit" parent="MarginContainer/VBoxContainer" unique_id=1416618750]
+layout_mode = 2
+text = "demo"
+placeholder_text = "Enter username"
+
+[node name="PasswordLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1137728116]
+layout_mode = 2
+text = "Password"
+
+[node name="PasswordInput" type="LineEdit" parent="MarginContainer/VBoxContainer" unique_id=1499635552]
+layout_mode = 2
+placeholder_text = "Enter password"
+secret = true
+
+[node name="LogonButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=340751295]
+layout_mode = 2
+text = "Logon"
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1439319189]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=1006499427]

@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://bhaoycjbu2aln"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/floating_panel.tscn" id="1_base"]
+[ext_resource type="Script" uid="uid://ir0y805x73qa" path="res://scripts/ui/data_inspector.gd" id="1_cipow"]
+
+[node name="DataInspector" unique_id=516332008 instance=ExtResource("1_base")]
+offset_right = 380.0
+offset_bottom = 340.0
+script = ExtResource("1_cipow")
+title = "Item Details"
+scale_text = true
+min_size = Vector2(300, 200)
+
+[node name="VBox" type="VBoxContainer" parent="Panel/VBox/Content" index="0" unique_id=684891172]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Selection" type="Label" parent="Panel/VBox/Content/VBox" index="0" unique_id=1622209058]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+autowrap_mode = 3
+
+[node name="Status" type="Label" parent="Panel/VBox/Content/VBox" index="1" unique_id=1456537513]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.65)
+autowrap_mode = 3
+
+[node name="Separator" type="HSeparator" parent="Panel/VBox/Content/VBox" index="2" unique_id=844001742]
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/VBox/Content/VBox" index="3" unique_id=2064530208]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Panel/VBox/Content/VBox/Scroll" index="0" unique_id=1328768407]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
