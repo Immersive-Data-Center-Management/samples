@@ -61,12 +61,13 @@ layout_mode = 2
 placeholder_text = "Enter password"
 secret = true
 
-[node name="LogonButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=340751295]
+[node name="LoginButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=340751295]
 layout_mode = 2
-text = "Logon"
+text = "Log in"
 
 [node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1439319189]
 layout_mode = 2
 horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=1006499427]

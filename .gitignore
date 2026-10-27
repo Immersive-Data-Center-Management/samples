@@ -1,16 +1,5 @@
+# Editor and OS clutter. Project-specific ignores live in each experiment's .gitignore.
 .idea/
-.venv/
-.godot/
-tmp/
-*.obj
-*.pdb
-*.os
-*.import
-__pycache__/
-*.pyc
-.DS_Store
-opencode.generated.json
-**/~lib*
-deploy/.env
-addons/IDTXFlow/
 .vscode/
+.DS_Store
+tmp/

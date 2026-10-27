@@ -1,6 +1,6 @@
 # Tests
 
-Offline checks for the AAS parsing helpers. They need no server. Run from the repo root:
+Offline checks for the AAS parsing helpers. They need no server. Run from the experiment folder (`Experiment_1/`):
 
 ```bash
 godot --headless --path . res://tests/test_aas_service.tscn
