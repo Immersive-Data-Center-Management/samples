@@ -4,7 +4,7 @@
 These placeholders keep the sample self-contained. Any USD that follows the
 contract in README.md can replace them.
 
-Requires the pxr Python package (OpenUSD).
+Requires usd-core 26.11 (OpenUSD Python bindings): pip install -r requirements.txt
 """
 
 from pathlib import Path

@@ -6,6 +6,11 @@
 
 Immersive Data Center Management Samples. Each experiment lives in its own folder with its own README.
 
+> [!IMPORTANT]
+> The code in this repository is sample code for demonstration and experimentation only. It is **not intended for
+> productive use of any kind**. It is not hardened, tested or supported for production: demo credentials, plain HTTP
+> and in-memory data stores are used on purpose.
+
 ## Experiments
 
 | Folder | What it shows |

@@ -1,6 +1,8 @@
+# Images are pinned by tag (readable) and digest (reproducible). To update one, pull the new tag and
+# copy its digest: docker pull <image>:<tag> && docker inspect --format '{{index .RepoDigests 0}}' <image>:<tag>
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:26.8.1
+    image: quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b
     command: ["start-dev", "--import-realm", "--http-port=8080"]
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
@@ -21,7 +23,7 @@ services:
     restart: unless-stopped
 
   aas-environment:
-    image: eclipsebasyx/aas-environment:2.0.0-milestone-15
+    image: eclipsebasyx/aas-environment:2.0.0-milestone-15@sha256:313da867059233e3c07e17a8ac21153a1f8fa0d02eada4e6b1b9f9e86afbd321
     environment:
       SERVER_PORT: "8081"
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/BaSyx
@@ -39,7 +41,7 @@ services:
     restart: unless-stopped
 
   assets:
-    image: nginx:1.27-alpine
+    image: nginx:1.30-alpine@sha256:47928bf67eb62a1863cb08d9ecb52d3e704304ba614eaee17884204677702951
     ports:
       - "8080:80"
     volumes:
@@ -48,7 +50,7 @@ services:
     restart: unless-stopped
 
   seed:
-    image: python:3.12-alpine
+    image: python:3.15-alpine@sha256:0aa144e9ec2ae8fd80dfd94070ef3e432a0df17b6e5e0091dc05323974ce9913
     environment:
       KEYCLOAK_URL: http://keycloak:8080
       AAS_URL: http://aas-environment:8081

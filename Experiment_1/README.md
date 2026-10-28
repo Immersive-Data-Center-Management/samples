@@ -2,6 +2,10 @@
 
 ## About this experiment
 
+> [!IMPORTANT]
+> Sample code for demonstration only, **not intended for productive use of any kind**. See the
+> [repository README](../README.md#about-this-project).
+
 A Godot desktop app that shows how to load **USD (Universal Scene Description) files in Godot with
 [IDTXFlow](https://github.com/Immersive-Data-Center-Management/idtx-flow)**. Godot has no built-in USD support;
 IDTXFlow is a GDExtension that adds it.
@@ -136,6 +140,17 @@ The hierarchy and details panels can be moved and resized.
 
 ## Licensing
 
-See the [repository README](../README.md#licensing). IDTXFlow (`addons/IDTXFlow/`) and the Docker images of the demo
-stack (Keycloak, Eclipse BaSyx, nginx, Python) are not part of this repository; they are downloaded at setup time and
-come with their own licenses.
+See the [repository README](../README.md#licensing). The following third-party components are not part of this
+repository. They are downloaded at setup time and come with their own licenses:
+
+| Component | Used for | Obtained via | License |
+|---|---|---|---|
+| [IDTXFlow](https://github.com/Immersive-Data-Center-Management/idtx-flow) 0.6.0 | USD loading in Godot | `bootstrap.ps1` into `addons/IDTXFlow/` | see its release (incl. `LICENSES-THIRD-PARTY/`) |
+| [Keycloak](https://www.keycloak.org/) 26.8.1 | login server (demo stack) | Docker image | Apache-2.0 |
+| [Eclipse BaSyx](https://eclipse.dev/basyx/) AAS environment 2.0.0-milestone-15 | AAS server (demo stack) | Docker image | MIT |
+| [nginx](https://nginx.org/) 1.30 | asset server (demo stack) | Docker image | BSD-2-Clause |
+| [Python](https://www.python.org/) 3.15 | runs the seed script (demo stack) | Docker image | PSF-2.0 |
+| [OpenUSD](https://openusd.org/) (`usd-core` 26.11) | only to regenerate or verify the placeholder assets | `pip install -r deploy/assets/requirements.txt` | Tomorrow Open Source Technology License 1.0 |
+
+The Docker images also contain a base OS (Alpine or UBI) with further packages under their own licenses. The licenses
+listed are those of the main projects.

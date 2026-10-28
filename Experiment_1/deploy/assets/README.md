@@ -7,13 +7,20 @@ The committed files are generated placeholders:
 - `Server_3U_00.usdc` – 3U server with a two-row drive face, bottom at Z=0.
 - `PowerSupply_00.usdc` – 3U power supply, bottom at Z=0, centered in X.
 
+Both scripts need OpenUSD's Python bindings (`pxr`), from the PyPI package
+[`usd-core`](https://pypi.org/project/usd-core/) 26.11 (Python 3.11 to 3.14). Install it with:
+
+```bash
+pip install -r requirements.txt
+```
+
 Regenerate them with:
 
 ```bash
 python generate_placeholders.py
 ```
 
-Requires the `pxr` Python package (OpenUSD). Verify the committed assets with:
+Verify the committed assets with:
 
 ```bash
 python verify_assets.py

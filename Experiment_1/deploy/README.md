@@ -12,8 +12,8 @@ expose this stack to the internet.
 | --- | --- | --- | --- |
 | `keycloak` | `quay.io/keycloak/keycloak:26.8.1` | http://127.0.0.1:8180 | Login server (realm `BaSyx`) |
 | `aas-environment` | `eclipsebasyx/aas-environment:2.0.0-milestone-15` | http://127.0.0.1:8081 | AAS REST API (shells and submodels) |
-| `assets` | `nginx:1.27-alpine` | http://127.0.0.1:8080/api/v1/download/ | Serves the USD files |
-| `seed` | `python:3.12-alpine` | – | Fills the AAS with the demo data, then exits |
+| `assets` | `nginx:1.30-alpine` | http://127.0.0.1:8080/api/v1/download/ | Serves the USD files |
+| `seed` | `python:3.15-alpine` | – | Fills the AAS with the demo data, then exits |
 
 **keycloak**: imports the realm `BaSyx` from
 [`keycloak/realm-export.json`](keycloak/realm-export.json) at startup, with the

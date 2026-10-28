@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Check that the demo USD assets contain IDTXFlow select colliders."""
+"""Check that the demo USD assets contain IDTXFlow select colliders.
+
+Requires usd-core 26.11 (OpenUSD Python bindings): pip install -r requirements.txt
+"""
 
 from pathlib import Path
 
