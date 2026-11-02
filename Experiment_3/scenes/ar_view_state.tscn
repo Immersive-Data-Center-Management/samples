@@ -1,0 +1,354 @@
+[gd_scene format=3 uid="uid://bwwy8ors20jyv"]
+
+[ext_resource type="Script" uid="uid://cu7j4ndwogwqb" path="res://scripts/ar_view_state.gd" id="1_50m1j"]
+[ext_resource type="Script" uid="uid://c7xkyxnwsp32e" path="res://addons/sample_framework_ar/ImageTrackedComponent.gd" id="2_bb3nx"]
+[ext_resource type="Texture2D" uid="uid://btblvlib18tuc" path="res://assets/textures/cropped_tracking_target.jpg" id="4_f6vt1"]
+[ext_resource type="Script" uid="uid://u0kfgsda1mli" path="res://scripts/slide_menu.gd" id="5_bb3nx"]
+[ext_resource type="Script" uid="uid://dvergm63frew3" path="res://addons/sample_framework_core/pickable_object.gd" id="6_pick"]
+[ext_resource type="Script" uid="uid://bqkqitb5hac77" path="res://scripts/fake_telemetry.gd" id="7_tele"]
+[ext_resource type="Script" uid="uid://bk0q83odf1wcb" path="res://addons/sample_framework_core/ui/status_chip.gd" id="8_chip"]
+[ext_resource type="Script" uid="uid://ngo6ir4ucx3s" path="res://addons/sample_framework_core/ui/property_list.gd" id="pl_list"]
+
+[sub_resource type="StyleBoxFlat" id="Btn_normal"]
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 8.0
+bg_color = Color(0.13, 0.15, 0.19, 0.85)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="Btn_hover"]
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 8.0
+bg_color = Color(0.2, 0.23, 0.29, 0.9)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="Btn_pressed"]
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 8.0
+bg_color = Color(0.27, 0.42, 0.7, 0.95)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="Btn_disabled"]
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 8.0
+bg_color = Color(0.13, 0.15, 0.19, 0.35)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="Theme" id="UiTheme"]
+Button/colors/font_color = Color(0.95, 0.96, 0.98, 1)
+Button/colors/font_disabled_color = Color(0.95, 0.96, 0.98, 0.4)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/colors/font_pressed_color = Color(1, 1, 1, 1)
+Button/font_sizes/font_size = 26
+Button/styles/disabled = SubResource("Btn_disabled")
+Button/styles/focus = SubResource("Btn_hover")
+Button/styles/hover = SubResource("Btn_hover")
+Button/styles/hover_pressed = SubResource("Btn_pressed")
+Button/styles/normal = SubResource("Btn_normal")
+Button/styles/pressed = SubResource("Btn_pressed")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_762ft"]
+bg_color = Color(1, 1, 1, 0.97)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 12
+
+[node name="ArViewState" type="Node3D" unique_id=1841784453]
+script = ExtResource("1_50m1j")
+
+[node name="FakeTelemetry" type="Node" parent="." unique_id=1822435501]
+script = ExtResource("7_tele")
+
+[node name="ImageTrackedComponent" type="Node3D" parent="." unique_id=1822435442]
+script = ExtResource("2_bb3nx")
+tracked_texture = ExtResource("4_f6vt1")
+physical_width = 0.0927
+metadata/_custom_type_script = "uid://c7xkyxnwsp32e"
+
+[node name="PositionHelper" type="Node3D" parent="ImageTrackedComponent" unique_id=1959656512]
+transform = Transform3D(-0.1107273, 1.671935e-08, -7.308261e-16, 0, -4.840042e-09, -0.1107273, -1.671935e-08, -0.1107273, 4.840042e-09, -0.03441379, 0.01266166, 0.09433855)
+
+[node name="PickableObject_ServerRack" type="Area3D" parent="ImageTrackedComponent/PositionHelper" unique_id=394552956]
+collision_layer = 0
+input_ray_pickable = false
+script = ExtResource("6_pick")
+object_id = "Server_rack"
+visuals_unselected = 17
+visuals_selected = 2
+hint_color = Color(0.5686275, 0.49411765, 0.1882353, 0.24313726)
+auto_fit_collider = false
+collider_padding = 1.0
+metadata/_custom_type_script = "uid://dvergm63frew3"
+
+[node name="ServerRack_usdc" type="UsdStageNode3D" parent="ImageTrackedComponent/PositionHelper/PickableObject_ServerRack" unique_id=126864759]
+stage_uri = "res://assets/usd/Rack/ServerRack.usdc"
+cached_scene_name = "user://usd_cache/ServerRack_3746173833_.scn"
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.3, 0, 0.511)
+metadata/__iusdnode3d_ptr = 2419786825832
+
+[node name="PickableObject_Server_00_usdc" type="Area3D" parent="ImageTrackedComponent/PositionHelper" unique_id=1465815181]
+script = ExtResource("6_pick")
+object_id = "Server_00_usdc"
+visuals_unselected = 9
+visuals_selected = 2
+highlight_color = Color(0.2, 0.6, 1, 0.1882353)
+hint_color = Color(0.38431373, 0.67058825, 0.4, 0.1882353)
+collider_padding = 1.0
+metadata/_custom_type_script = "uid://dvergm63frew3"
+
+[node name="Server_00_usdc" type="UsdStageNode3D" parent="ImageTrackedComponent/PositionHelper/PickableObject_Server_00_usdc" unique_id=1066354422]
+stage_uri = "res://assets/usd/Rack/Server_00.usdc"
+cached_scene_name = "user://usd_cache/Server_00_1131637383_.scn"
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.3, 0.67585, 0.511)
+metadata/__iusdnode3d_ptr = 2419786828872
+
+[node name="PickableObject_Server_01_usdc" type="Area3D" parent="ImageTrackedComponent/PositionHelper" unique_id=1959862952]
+script = ExtResource("6_pick")
+object_id = "Server_01_usdc"
+visuals_unselected = 9
+visuals_selected = 2
+highlight_color = Color(0.2, 0.6, 1, 0.1882353)
+hint_color = Color(0.38431373, 0.67058825, 0.4, 0.1882353)
+collider_padding = 1.0
+metadata/_custom_type_script = "uid://dvergm63frew3"
+
+[node name="Server_2U_00_usdc" type="UsdStageNode3D" parent="ImageTrackedComponent/PositionHelper/PickableObject_Server_01_usdc" unique_id=999793309]
+stage_uri = "res://assets/usd/Rack/Server_2U_00.usdc"
+cached_scene_name = "user://usd_cache/Server_2U_00_1680281485_.scn"
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.3, 0.5425, 0.511)
+metadata/__iusdnode3d_ptr = 2419786829176
+
+[node name="PickableObject_Server_02_usdc" type="Area3D" parent="ImageTrackedComponent/PositionHelper" unique_id=1327005390]
+script = ExtResource("6_pick")
+object_id = "Server_02_usdc"
+visuals_unselected = 9
+visuals_selected = 2
+highlight_color = Color(0.2, 0.6, 1, 0.1882353)
+hint_color = Color(0.38431373, 0.67058825, 0.4, 0.1882353)
+collider_padding = 1.0
+metadata/_custom_type_script = "uid://dvergm63frew3"
+
+[node name="Server_2U_00_usdc" type="UsdStageNode3D" parent="ImageTrackedComponent/PositionHelper/PickableObject_Server_02_usdc" unique_id=97670389]
+stage_uri = "res://assets/usd/Rack/Server_2U_00.usdc"
+cached_scene_name = "user://usd_cache/Server_2U_00_1680281485_.scn"
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.3, 0.4536, 0.511)
+metadata/__iusdnode3d_ptr = 2419786832216
+
+[node name="PickableObject_Server_03_usdc" type="Area3D" parent="ImageTrackedComponent/PositionHelper" unique_id=514768167]
+script = ExtResource("6_pick")
+object_id = "Server_03_usdc"
+visuals_unselected = 9
+visuals_selected = 2
+highlight_color = Color(0.2, 0.6, 1, 0.1882353)
+hint_color = Color(0.38431373, 0.67058825, 0.4, 0.1882353)
+collider_padding = 1.0
+metadata/_custom_type_script = "uid://dvergm63frew3"
+
+[node name="Server_3U_00_usdc" type="UsdStageNode3D" parent="ImageTrackedComponent/PositionHelper/PickableObject_Server_03_usdc" unique_id=1654954647]
+stage_uri = "res://assets/usd/Rack/Server_3U_00.usdc"
+cached_scene_name = "user://usd_cache/Server_3U_00_1748082862_.scn"
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.3, 0.7203, 0.511)
+metadata/__iusdnode3d_ptr = 2419786829784
+
+[node name="PickableObject_PowerSupply_00_usdc" type="Area3D" parent="ImageTrackedComponent/PositionHelper" unique_id=1747223227]
+script = ExtResource("6_pick")
+object_id = "PowerSupply_00_usdc"
+visuals_unselected = 9
+visuals_selected = 2
+highlight_color = Color(0.2, 0.6, 1, 0.1882353)
+hint_color = Color(0.38431373, 0.67058825, 0.4, 0.1882353)
+collider_padding = 1.0
+metadata/_custom_type_script = "uid://dvergm63frew3"
+
+[node name="PowerSupply_00_usdc" type="UsdStageNode3D" parent="ImageTrackedComponent/PositionHelper/PickableObject_PowerSupply_00_usdc" unique_id=477162363]
+stage_uri = "res://assets/usd/Rack/PowerSupply_00.usdc"
+cached_scene_name = "user://usd_cache/PowerSupply_00_4013068426_.scn"
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.3, 1.0759, 0.511)
+metadata/__iusdnode3d_ptr = 2419786817016
+
+[node name="PickableObject_NetworkSwitch_00_usdc" type="Area3D" parent="ImageTrackedComponent/PositionHelper" unique_id=86916732]
+script = ExtResource("6_pick")
+object_id = "NetworkSwitch_00_usdc"
+visuals_unselected = 9
+visuals_selected = 2
+highlight_color = Color(0.2, 0.6, 1, 0.1882353)
+hint_color = Color(0.38431373, 0.67058825, 0.4, 0.1882353)
+collider_padding = 1.0
+metadata/_custom_type_script = "uid://dvergm63frew3"
+
+[node name="NetworkSwitch_00_usdc" type="UsdStageNode3D" parent="ImageTrackedComponent/PositionHelper/PickableObject_NetworkSwitch_00_usdc" unique_id=116501711]
+stage_uri = "res://assets/usd/Rack/NetworkSwitch_00.usdc"
+cached_scene_name = "user://usd_cache/NetworkSwitch_00_500804236_.scn"
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.3, 0.987, 0.511)
+metadata/__iusdnode3d_ptr = 2419786820360
+
+[node name="UI" type="Control" parent="." unique_id=448465105]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+theme = SubResource("UiTheme")
+
+[node name="MarginContainer" type="MarginContainer" parent="UI" unique_id=1286472803]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Top" type="VBoxContainer" parent="UI/MarginContainer" unique_id=78253700]
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Row" type="HBoxContainer" parent="UI/MarginContainer/Top" unique_id=78253701]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="ModeLabel" type="Label" parent="UI/MarginContainer/Top/Row" unique_id=78253721]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.6)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 32
+text = "AR"
+
+[node name="Toggle_FreezeAR" type="CheckButton" parent="UI/MarginContainer/Top/Row" unique_id=2001993507]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Freeze"
+
+[node name="Toggle_3DView" type="CheckButton" parent="UI/MarginContainer/Top/Row" unique_id=2001993508]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "3D view"
+
+[node name="StatusChip" type="Button" parent="UI/MarginContainer/Top" unique_id=2001993601]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.55, 0.1, 1)
+theme_override_font_sizes/font_size = 28
+text = "⚠ 1 warning"
+script = ExtResource("8_chip")
+
+[node name="ScanHint" type="Label" parent="UI" unique_id=2001993602]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 32
+text = "Point the camera at the rack target"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="BottomSlideInMenu" type="Panel" parent="UI" unique_id=706229615 node_paths=PackedStringArray("button_center", "content_container", "handle")]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -60.0
+offset_bottom = 440.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_762ft")
+script = ExtResource("5_bb3nx")
+button_center = NodePath("Padding/VBoxContainer/button_center")
+content_container = NodePath("Padding/VBoxContainer/ScrollContainer/InfoList")
+handle = NodePath("Padding/VBoxContainer/button_handle")
+handle_text_closed = "▲  Details"
+handle_text_open = "▼"
+
+[node name="Padding" type="MarginContainer" parent="UI/BottomSlideInMenu" unique_id=1248770699]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/BottomSlideInMenu/Padding" unique_id=1248770698]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="button_handle" type="Button" parent="UI/BottomSlideInMenu/Padding/VBoxContainer" unique_id=141882025]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.48, 0.53, 1)
+theme_override_colors/font_hover_color = Color(0.2, 0.22, 0.26, 1)
+theme_override_colors/font_pressed_color = Color(0.2, 0.22, 0.26, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.48, 0.53, 1)
+flat = true
+text = "▲  Details"
+
+[node name="button_center" type="Button" parent="UI/BottomSlideInMenu/Padding/VBoxContainer" unique_id=141882028]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Center on selected"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/BottomSlideInMenu/Padding/VBoxContainer" unique_id=141882026]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="InfoList" type="VBoxContainer" parent="UI/BottomSlideInMenu/Padding/VBoxContainer/ScrollContainer" unique_id=141882027]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("pl_list")
+font_color = Color(0.18, 0.18, 0.18, 1)
+font_size = 24

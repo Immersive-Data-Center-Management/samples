@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://htmy58wjl5tw"]
+
+[ext_resource type="PackedScene" uid="uid://cmy4hgkgrnss4" path="res://addons/sample_framework_ar/XRSetup.tscn" id="1_xr"]
+[ext_resource type="Script" uid="uid://dhdnpcxc7j5fw" path="res://addons/sample_framework_core/flow/state_manager.gd" id="2_sm"]
+[ext_resource type="Script" uid="uid://b1o6on4hnj5j1" path="res://scripts/main.gd" id="3_main"]
+[ext_resource type="PackedScene" path="res://scenes/login_state.tscn" id="4_login"]
+[ext_resource type="PackedScene" path="res://scenes/task_state.tscn" id="5_task"]
+[ext_resource type="PackedScene" path="res://scenes/scan_state.tscn" id="6_scan"]
+[ext_resource type="PackedScene" path="res://scenes/inspect_state.tscn" id="7_insp"]
+
+[node name="Main" type="Node3D" unique_id=1187511417]
+script = ExtResource("3_main")
+
+[node name="XRSetup" parent="." unique_id=1264418779 instance=ExtResource("1_xr")]
+enabled_features = 0
+
+[node name="StateManager" type="Node" parent="." unique_id=189047765 node_paths=PackedStringArray("start_state")]
+script = ExtResource("2_sm")
+start_state = NodePath("Login")
+
+[node name="Login" parent="StateManager" unique_id=240427885 node_paths=PackedStringArray("next_state") instance=ExtResource("4_login")]
+next_state = NodePath("../Task")
+
+[node name="Task" parent="StateManager" unique_id=1430464994 node_paths=PackedStringArray("scan_state") instance=ExtResource("5_task")]
+scan_state = NodePath("../Scan")
+
+[node name="Scan" parent="StateManager" unique_id=974664773 node_paths=PackedStringArray("task_state", "next_state") instance=ExtResource("6_scan")]
+task_state = NodePath("../Task")
+next_state = NodePath("../Inspect")
+
+[node name="Inspect" parent="StateManager" unique_id=681627604 node_paths=PackedStringArray("next_state") instance=ExtResource("7_insp")]
+next_state = NodePath("../Task")

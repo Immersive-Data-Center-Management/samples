@@ -1,0 +1,4 @@
+# Keep the Gradle wrapper and hook scripts runnable on every OS, whatever core.autocrlf is set to.
+gradlew text eol=lf
+hooks/* text eol=lf
+*.bat text eol=crlf
