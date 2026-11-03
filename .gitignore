@@ -1,0 +1,5 @@
+# Editor and OS clutter. Project-specific ignores live in each experiment's .gitignore.
+.idea/
+.vscode/
+.DS_Store
+tmp/

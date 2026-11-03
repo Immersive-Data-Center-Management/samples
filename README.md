@@ -4,18 +4,30 @@
 
 ## About this project
 
-Immersive Data Center Management Samples
+Immersive Data Center Management Samples. Each experiment lives in its own folder with its own README.
+
+> [!IMPORTANT]
+> The code in this repository is sample code for demonstration and experimentation only. It is **not intended for
+> productive use of any kind**. It is not hardened, tested or supported for production: demo credentials, plain HTTP
+> and in-memory data stores are used on purpose.
+
+## Experiments
+
+| Folder | What it shows |
+|---|---|
+| [`Experiment_1/`](Experiment_1/README.md) | Godot desktop app: Keycloak login, rack list from an AAS server, racks and their components loaded as USD via IDTXFlow and shown in 3D with their AAS nameplate data. |
 
 ## Requirements and Setup
 
-*Insert a short description what is required to get your project running...*
+Every experiment is self-contained. See its README for requirements and setup.
 
 ## Support, Feedback, Contributing
 
-This project is open to feature requests/suggestions, bug reports etc. via [GitHub issues](https://github.com/Immersive-Data-Center-Management/<your-project>/issues). Contribution and feedback are encouraged and always welcome. For more information about how to contribute, the project structure, as well as additional contribution information, see our [Contribution Guidelines](CONTRIBUTING.md).
+This project is open to feature requests/suggestions, bug reports etc. via [GitHub issues](https://github.com/Immersive-Data-Center-Management/samples/issues). Contribution and feedback are encouraged and always welcome. For more information about how to contribute, the project structure, as well as additional contribution information, see our [Contribution Guidelines](CONTRIBUTING.md).
 
 ## Security / Disclosure
-If you find any bug that may be a security problem, please follow our instructions at [in our security policy](https://github.com/Immersive-Data-Center-Management/<your-project>/security/policy) on how to report it. Please do not create GitHub issues for security-related doubts or problems.
+
+If you find any bug that may be a security problem, please follow our instructions at [in our security policy](https://github.com/Immersive-Data-Center-Management/samples/security/policy) on how to report it. Please do not create GitHub issues for security-related doubts or problems.
 
 ## Code of Conduct
 
@@ -23,4 +35,6 @@ We as members, contributors, and leaders pledge to make participation in our com
 
 ## Licensing
 
-Copyright 2026 SAP SE or an SAP affiliate company and samples contributors. Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/Immersive-Data-Center-Management/<your-project>).
+Copyright 2026 SAP SE or an SAP affiliate company and samples contributors. Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/Immersive-Data-Center-Management/samples).
+
+Experiments may download third-party components at setup time (for example GDExtensions or Docker images). These are not part of this repository and come with their own licenses; see each experiment's README.

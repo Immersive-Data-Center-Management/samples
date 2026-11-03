@@ -1,0 +1,32 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="IDTXFlowExperiment1"
+run/main_scene="res://scenes/screens/login_screen.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[autoload]
+
+AppState="*res://scripts/app_state.gd"
+
+[dotnet]
+
+project/assembly_name="IDTXFlowExperiment1"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/IDTXFlow/plugin.cfg")
+
+[filesystem]
+
+import/fbx2gltf/enabled=false
+import/blender/enabled=false

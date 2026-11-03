@@ -1,0 +1,13 @@
+.venv/
+.godot/
+tmp/
+*.obj
+*.pdb
+*.os
+*.import
+__pycache__/
+*.pyc
+opencode.generated.json
+**/~lib*
+deploy/.env
+addons/IDTXFlow/
