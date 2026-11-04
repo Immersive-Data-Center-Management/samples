@@ -23,28 +23,84 @@ Godot. Each experiment lives in its own folder with its own README; the parts th
 | [`Experiment_3/`](Experiment_3/README.md) | *Take the rack with you:* point the phone at a rack, see its parts in AR with a warning on the overheating one, freeze the view and keep exploring at your desk. | ARCore plugin (image tracking, freeze), 3D view of the AR content, USD in AR, AR picking | Android (desktop preview) |
 | [`shared/`](shared/README.md) | Reusable Godot addons, the ARCore plugin source, the demo backend (Keycloak + BaSyx) | – | – |
 
-## Requirements and Setup
+## Quick start
 
-The 3D models, images and Android libraries are stored with [Git LFS](https://git-lfs.com/). Install it once
-(`git lfs install`; it is included in Git for Windows) **before** you clone. A clone without Git LFS, or a ZIP
-download from GitHub, contains small text pointers instead of these files, and Godot reports import errors. Fix an
-existing clone with `git lfs pull`.
+Step by step from a fresh PC to all three experiments running. Each step links to the details for when something
+goes wrong.
 
-Close Godot and double-click [`bootstrap_all.bat`](bootstrap_all.bat) (Windows). It downloads IDTXFlow and links the
-shared addons into every experiment. To set up a single experiment, run its `bootstrap.ps1` instead. See the
-experiment's README for requirements and setup.
+### What you need
 
-Experiments 1 and 2 also need the demo backend (Keycloak, BaSyx AAS and a file server for the 3D models), which runs in
-Docker. On Windows, open a WSL shell (e.g. Ubuntu) and start it:
+| | Exp 1 | Exp 2 | Exp 3 |
+|---|---|---|---|
+| Windows, [Godot 4.7.2](https://godotengine.org/download), Git with [Git LFS](https://git-lfs.com/) | ✓ | ✓ | ✓ |
+| Docker in WSL2, for the demo backend (Keycloak, AAS, 3D models) | ✓ | ✓ | – |
+| Android phone with ARCore (arm64), USB debugging on | – | ✓, the desktop is a fallback without camera | ✓, the desktop is only a preview |
+| Something to point the phone at | – | [`rack_01.jpg`](Experiment_2/qr_codes/rack_01.jpg) on a monitor, or printed QR codes | [image target](Experiment_3/docs/full_image_target.jpg) printed at **19 cm width** |
 
-```bash
-cd /mnt/c/<path to repo>/shared/deploy   # Windows drive C: is /mnt/c in WSL
-docker compose up -d                     # start all services in the background
-```
+### Steps
 
-Keep the WSL terminal open while you use it. No WSL or Docker yet? Follow
-[Docker Engine in WSL2](shared/deploy/README.md#docker-engine-in-wsl2-ubuntu) once. For checks, stopping and reseeding see
-[Start](shared/deploy/README.md#start) and [Stop](shared/deploy/README.md#stop).
+1. **Clone with Git LFS.** Run `git lfs install` once, **before** you clone. Without it, or with a ZIP download, the
+   3D models, images and Android libraries are small text pointers and Godot reports import errors. Already cloned:
+   `git lfs pull`.
+2. **Bootstrap.** Close Godot and double-click [`bootstrap_all.bat`](bootstrap_all.bat). It downloads IDTXFlow and
+   links the shared addons into every experiment. Without it the projects open with missing addons.
+3. **Start the demo backend** (Exp 1 and 2). These two apps have no built-in data: after a Keycloak login they read
+   the racks and live values from the AAS and download the 3D models (USD) from an asset server. The backend runs
+   all three locally with fictional demo data.
+
+   <details>
+   <summary>No WSL or Docker yet? One-time setup, about 10 minutes</summary>
+
+   In PowerShell: `wsl --install -d Ubuntu`, restart Windows if asked. Start "Ubuntu" from the Start menu and create
+   a Linux user. Then in Ubuntu:
+   ```bash
+   sudo apt-get update                                  # refresh Ubuntu's package list
+   sudo apt-get install -y docker.io docker-compose-v2  # install Docker Engine and the "docker compose" command
+   sudo usermod -aG docker "$USER"                      # allow your user to run docker without sudo
+   ```
+   Run `wsl --shutdown` in PowerShell and reopen Ubuntu, so the group change applies. Details:
+   [Docker Engine in WSL2](shared/deploy/README.md#docker-engine-in-wsl2-ubuntu).
+   </details>
+
+   In a WSL shell (e.g. Ubuntu):
+   ```bash
+   cd /mnt/c/<path to repo>/shared/deploy   # Windows drive C: is /mnt/c in WSL
+   docker compose up -d                     # start all services in the background
+   docker compose logs -f seed              # wait for "[seed] done", then Ctrl+C
+   ```
+   Keep the WSL terminal open. If WSL stops, the data is gone and the app finds no rack: run
+   `docker compose run --rm seed` again.
+
+   Docker Desktop already installed? It should work too (not tested): run the same commands in PowerShell in
+   `shared/deploy`, no WSL shell needed. Check its license terms first; larger companies need a paid subscription.
+
+   *Problems:* Docker not running → `sudo service docker start`; checks and reseeding →
+   [Start](shared/deploy/README.md#start).
+4. **Run on the desktop.** Open the experiment's `project.godot` in Godot 4.7.2 and press F5. The login is prefilled
+   (Exp 1: `demo` / `demo`, Exp 2: `technician_1` / `technician_1`). Exp 2 and 3 are made
+   for the phone; the desktop is a quick check without camera (Exp 2: Enter in the text field "scans" the prefilled
+   QR code).
+5. **Run on the phone** (Exp 2 and 3), once per PC:
+   - Set up Godot's Android export: export templates, Android SDK and Java (Editor Settings → Export → Android), see
+     [Exporting for Android](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_android.html).
+   - In each project: **Project → Install Android Build Template** (the presets use a Gradle build, and the `android/`
+     folder is not checked in).
+   - Connect the phone and use the one-click deploy button (top right) or **Project → Export → Android**.
+   - Exp 2 only, after every USB reconnect: let the phone reach the backend on the PC.
+     ```
+     adb reverse tcp:8180 tcp:8180   # login (Keycloak)
+     adb reverse tcp:8081 tcp:8081   # AAS (BaSyx)
+     adb reverse tcp:8080 tcp:8080   # 3D models (asset server)
+     ```
+     "Status unknown" or a failing login on the phone means this is missing.
+
+   *Problems:* Wi-Fi instead of USB → [Phone access](shared/deploy/README.md#phone-access); what to scan or aim at →
+   [Experiment 2](Experiment_2/README.md#run), [Experiment 3](Experiment_3/README.md#requirements-and-setup).
+
+Each experiment has a more detailed README: how it works, the full requirements and setup (including a single
+experiment and macOS) and the code layout: [Experiment 1](Experiment_1/README.md),
+[Experiment 2](Experiment_2/README.md), [Experiment 3](Experiment_3/README.md). The shared addons and the demo backend
+are described in [`shared/`](shared/README.md) and [`shared/deploy/`](shared/deploy/README.md).
 
 ## Support, Feedback, Contributing
 

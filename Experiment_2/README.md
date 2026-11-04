@@ -58,7 +58,8 @@ A QR code holds the AAS shell id of its part, e.g. `urn:apeirora.eu:aas:demo:ser
 ## Requirements and Setup
 
 - Windows, Godot 4.7.2
-- An Android phone with ARCore support (arm64) for scanning; the desktop runs the whole flow too (see below)
+- An Android phone with ARCore support (arm64). The desktop is a fallback for a quick check: the flow works, but
+  without the camera (the scan screen has a text field instead, see below)
 - The demo stack from [`shared/deploy`](../shared/deploy/README.md), running
 
 ### Run
