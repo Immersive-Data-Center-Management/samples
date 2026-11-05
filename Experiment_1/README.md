@@ -74,13 +74,13 @@ uses the same download URL shape, but this sample does not use it.
 
 - Windows (tested). macOS on Apple Silicon should work too, but is not tested; see below.
 - Godot 4.7.2
-- IDTXFlow 0.6.0, installed into `addons/IDTXFlow` by `bootstrap.ps1` (not checked in)
+- IDTXFlow 0.6.1, installed into `addons/IDTXFlow` by `bootstrap.ps1` (not checked in)
 - An AAS server with Keycloak: the demo stack below, or your own
 
-**macOS (untested):** the app code has nothing Windows-specific, and IDTXFlow 0.6.0 also ships an Apple Silicon
+**macOS (untested):** the app code has nothing Windows-specific, and IDTXFlow 0.6.1 also ships an Apple Silicon
 (arm64) build. Intel Macs are not supported. `bootstrap.ps1` only fetches the Windows build, so install it by hand:
 download
-[`gdextension-macOS.zip`](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/download/v0.6.0/gdextension-macOS.zip)
+[`gdextension-macOS.zip`](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/download/v0.6.1/gdextension-macOS.zip)
 and copy its `artifacts/gdextension/IDTXFlow/` folder to `addons/IDTXFlow/`. The zip has a different layout than the
 Windows one. If macOS blocks the downloaded libraries, run `xattr -dr com.apple.quarantine addons/IDTXFlow`.
 
@@ -111,8 +111,8 @@ Docker setup, the services and seed data, stopping and reseeding are described i
    ```
    The script calls [`shared/bootstrap.ps1`](../shared/bootstrap.ps1). It links `addons/sample_framework_core` and
    `addons/sample_framework_aas` to `shared/addons/` and downloads the Windows binary release
-   ([`gdextension-Windows.zip`](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/download/v0.6.0/gdextension-Windows.zip)
-   from the [idtx-flow v0.6.0 release](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/tag/v0.6.0)),
+   ([`gdextension-Windows.zip`](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/download/v0.6.1/gdextension-Windows.zip)
+   from the [idtx-flow v0.6.1 release](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/tag/v0.6.1)),
    checks its SHA256 and unzips it to `addons/IDTXFlow/`. You can also skip it and do this by hand.
 3. Open `Experiment_1/project.godot` in Godot 4.7.2 and run the project (F5), or export it as a Windows executable.
 4. Log in. The server URL `http://127.0.0.1:8081` and user `demo` are prefilled; the password is `demo`.
@@ -145,6 +145,6 @@ The hierarchy and details panels can be moved and resized.
 ## Licensing
 
 See the [repository README](../README.md#licensing). [IDTXFlow](https://github.com/Immersive-Data-Center-Management/idtx-flow)
-0.6.0 is downloaded by `bootstrap.ps1` into `addons/IDTXFlow/` and comes with its own licenses (see its release, incl.
+0.6.1 is downloaded by `bootstrap.ps1` into `addons/IDTXFlow/` and comes with its own licenses (see its release, incl.
 `LICENSES-THIRD-PARTY/`). The demo stack's components are listed in
 [`shared/deploy/README.md`](../shared/deploy/README.md#licensing).
