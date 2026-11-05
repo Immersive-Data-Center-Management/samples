@@ -226,6 +226,16 @@ func qr_scanner_is_active() -> bool:
 		return arcore_interface.qr_scanner_is_active()
 	return false
 
+## Scan every N-th frame (default 5). Scans run asynchronously, so a low value costs no frame time.
+func qr_scanner_set_scan_interval(frames: int):
+	if arcore_interface:
+		arcore_interface.qr_scanner_set_scan_interval(frames)
+
+## Seconds a code may be out of view before qr_code_lost is emitted (default 2).
+func qr_scanner_set_lost_timeout(seconds: float):
+	if arcore_interface:
+		arcore_interface.qr_scanner_set_lost_timeout(seconds)
+
 func qr_scanner_set_capture_detected_images(enabled: bool):
 	if arcore_interface:
 		arcore_interface.qr_scanner_set_capture_detected_images(enabled)

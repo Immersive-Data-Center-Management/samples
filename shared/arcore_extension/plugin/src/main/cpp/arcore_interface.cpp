@@ -743,7 +743,8 @@ void ARCoreInterface::_post_draw_viewport(const RID &p_render_target, const Rect
 	ERR_FAIL_COND(p_screen_rect == Rect2());
 
 	Rect2 src_rect(0.0f, 0.0f, 1.0f, 1.0f);
-	Rect2 dst_rect = p_screen_rect;
+	// p_screen_rect keeps the size from startup when the device rotates; the window has the real one.
+	Rect2 dst_rect(Vector2(), Vector2(DisplayServer::get_singleton()->window_get_size()));
 
 	add_blit(p_render_target, src_rect, dst_rect, false, 0, false, Vector2(), 0, 0, 0.0, 1.0);
 }

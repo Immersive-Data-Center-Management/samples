@@ -11,8 +11,8 @@ import com.google.mlkit.vision.common.InputImage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -53,102 +53,87 @@ public class QRScannerBridge {
         scanner = BarcodeScanning.getClient(options);
     }
 
+    /** Result of the last finished scan, picked up by pollResult(). */
+    private final AtomicReference<byte[]> result = new AtomicReference<>();
+    private final AtomicBoolean busy = new AtomicBoolean(false);
+
     /**
-     * Synchronous scan of a grayscale (Y-plane) image.
-         * Returns a packed byte array:
-         * [u32 count]
-         * repeated count times:
-        *   [i32 left, i32 top, i32 right, i32 bottom,
-        *    u32 data_len, u8[data_len] raw_utf8,
-        *    u32 format_len, u8[format_len] format_utf8]
-     *
-     * @param imageData  Grayscale (Y-plane) byte array
-     * @param width      Image width
-     * @param height     Image height
-     * @param rotation   Image rotation (0, 90, 180, 270)
-         * @return Packed detection payload, or null if scanning failed
+     * Starts an asynchronous scan of an NV21 image and returns at once, so the render thread
+     * never waits for ML Kit. Returns false if the previous scan is still running.
+     * The result is fetched with pollResult() in a later frame.
      */
-        public byte[] scanImage(byte[] imageData, int width, int height, int rotation) {
+    public boolean submitImage(byte[] imageData, int width, int height, int rotation) {
+        if (!busy.compareAndSet(false, true)) {
+            return false;
+        }
         try {
             InputImage inputImage = InputImage.fromByteArray(
-                    imageData, width, height, rotation,
-                    InputImage.IMAGE_FORMAT_NV21);
-
-            final List<PackedDetection> results = new ArrayList<>();
-            final CountDownLatch latch = new CountDownLatch(1);
-            final Exception[] error = new Exception[1];
-
+                    imageData, width, height, rotation, InputImage.IMAGE_FORMAT_NV21);
             scanner.process(inputImage)
-                    .addOnSuccessListener(barcodes -> {
-                        for (Barcode barcode : barcodes) {
-                            String rawValue = barcode.getRawValue();
-                            if (rawValue == null) continue;
-                            byte[] rawUtf8 = rawValue.getBytes(StandardCharsets.UTF_8);
-                            byte[] formatUtf8 = formatToString(barcode.getFormat()).getBytes(StandardCharsets.UTF_8);
-                            Rect bounds = barcode.getBoundingBox();
-
-                            int left = bounds != null ? bounds.left : 0;
-                            int top = bounds != null ? bounds.top : 0;
-                            int right = bounds != null ? bounds.right : width;
-                            int bottom = bounds != null ? bounds.bottom : height;
-
-                            results.add(new PackedDetection(
-                                    rawUtf8,
-                                    formatUtf8,
-                                    left,
-                                    top,
-                                    right,
-                                    bottom));
-
-                        }
-                        latch.countDown();
-                    })
+                    .addOnSuccessListener(barcodes -> finish(pack(barcodes, width, height)))
                     .addOnFailureListener(e -> {
-                        error[0] = e;
                         android.util.Log.e("QRScannerBridge", "ML Kit scanning failed", e);
-                        latch.countDown();
+                        finish(EMPTY_RESULT);
                     });
-
-            try {
-                // Wait up to 500ms for ML Kit to process
-                boolean completed = latch.await(500, TimeUnit.MILLISECONDS);
-                if (!completed) {
-                    android.util.Log.w("QRScannerBridge", "ML Kit scanning timed out after 500ms");
-                }
-            } catch (InterruptedException e) {
-                android.util.Log.e("QRScannerBridge", "Interrupted while waiting for ML Kit", e);
-            }
-
-            if (error[0] != null) {
-                return null;  // Error occurred
-            }
-
-            if (results.isEmpty()) {
-                return EMPTY_RESULT;
-            }
-
-            int totalSize = 4;
-            for (PackedDetection d : results) {
-                totalSize += 4 + 4 + 4 + 4 + 4 + d.rawUtf8.length + 4 + d.formatUtf8.length;
-            }
-
-            ByteBuffer out = ByteBuffer.allocate(totalSize).order(ByteOrder.LITTLE_ENDIAN);
-            out.putInt(results.size());
-            for (PackedDetection d : results) {
-                out.putInt(d.left);
-                out.putInt(d.top);
-                out.putInt(d.right);
-                out.putInt(d.bottom);
-                out.putInt(d.rawUtf8.length);
-                out.put(d.rawUtf8);
-                out.putInt(d.formatUtf8.length);
-                out.put(d.formatUtf8);
-            }
-            return out.array();
+            return true;
         } catch (Exception e) {
-            android.util.Log.e("QRScannerBridge", "Exception in scanImage", e);
-            return null;
+            android.util.Log.e("QRScannerBridge", "Exception in submitImage", e);
+            busy.set(false);
+            return false;
         }
+    }
+
+    /**
+     * Returns the packed result of a finished scan (consumed on read), or null while the scan
+     * is still running. Format:
+     * [u32 count], then count times
+     * [i32 left, i32 top, i32 right, i32 bottom, u32 data_len, u8[data_len] raw_utf8,
+     *  u32 format_len, u8[format_len] format_utf8]
+     */
+    public byte[] pollResult() {
+        return result.getAndSet(null);
+    }
+
+    private void finish(byte[] packed) {
+        result.set(packed);
+        busy.set(false);
+    }
+
+    private static byte[] pack(List<Barcode> barcodes, int width, int height) {
+        final List<PackedDetection> results = new ArrayList<>();
+        for (Barcode barcode : barcodes) {
+            String rawValue = barcode.getRawValue();
+            if (rawValue == null) continue;
+            Rect bounds = barcode.getBoundingBox();
+            results.add(new PackedDetection(
+                    rawValue.getBytes(StandardCharsets.UTF_8),
+                    formatToString(barcode.getFormat()).getBytes(StandardCharsets.UTF_8),
+                    bounds != null ? bounds.left : 0,
+                    bounds != null ? bounds.top : 0,
+                    bounds != null ? bounds.right : width,
+                    bounds != null ? bounds.bottom : height));
+        }
+        if (results.isEmpty()) {
+            return EMPTY_RESULT;
+        }
+
+        int totalSize = 4;
+        for (PackedDetection d : results) {
+            totalSize += 4 + 4 + 4 + 4 + 4 + d.rawUtf8.length + 4 + d.formatUtf8.length;
+        }
+        ByteBuffer out = ByteBuffer.allocate(totalSize).order(ByteOrder.LITTLE_ENDIAN);
+        out.putInt(results.size());
+        for (PackedDetection d : results) {
+            out.putInt(d.left);
+            out.putInt(d.top);
+            out.putInt(d.right);
+            out.putInt(d.bottom);
+            out.putInt(d.rawUtf8.length);
+            out.put(d.rawUtf8);
+            out.putInt(d.formatUtf8.length);
+            out.put(d.formatUtf8);
+        }
+        return out.array();
     }
 
     private static String formatToString(int format) {

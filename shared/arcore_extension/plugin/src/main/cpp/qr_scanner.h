@@ -8,6 +8,7 @@
 #include "include/arcore_c_api.h"
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/rect2.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <jni.h>
@@ -88,7 +89,16 @@ private:
 	// JNI references to the Java bridge
 	jclass m_bridge_class = nullptr;
 	jobject m_bridge_instance = nullptr;
-	jmethodID m_scan_method = nullptr;
+	jmethodID m_submit_method = nullptr;
+	jmethodID m_poll_method = nullptr;
+
+	// Async scan: one image is with ML Kit at a time, its result is polled in a later frame.
+	bool m_scan_in_flight = false;
+	bool m_discard_result = false; // scanning was stopped while a scan was running
+	// Copy of the scanned Y plane, only kept when cropped images are captured.
+	godot::PackedByteArray m_scan_y;
+	int m_scan_width = 0;
+	int m_scan_height = 0;
 
 	// Active detections: qr_data -> detection info
 	godot::HashMap<godot::String, QRDetection> m_active_detections;
@@ -98,6 +108,8 @@ private:
 	godot::Vector<godot::String> m_lost_codes;
 
 	void _scan_frame(ArSession &p_ar_session, ArFrame &p_ar_frame);
+	void _poll_result(ArSession &p_ar_session, ArFrame &p_ar_frame);
+	void _apply_result(JNIEnv *p_env, jbyteArray p_results, ArSession *p_ar_session, ArFrame *p_ar_frame);
 	godot::Ref<godot::Image> _crop_image_region(const uint8_t *p_yuv_data, int p_width, int p_height,
 			int p_left, int p_top, int p_right, int p_bottom);
 };

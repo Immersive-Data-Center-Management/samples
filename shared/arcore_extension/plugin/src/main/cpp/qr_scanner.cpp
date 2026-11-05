@@ -66,18 +66,17 @@ void QRScanner::initialize(JNIEnv *p_env, jobject p_activity) {
 	p_env->DeleteLocalRef(local_instance);
 	ALOGV("Godot ARCore QR: Created bridge instance: %p", m_bridge_instance);
 
-	// Cache the scan method
-	m_scan_method = p_env->GetMethodID(m_bridge_class, "scanImage", "([BIII)[B");
-	if (!m_scan_method) {
-		ALOGE("Godot ARCore QR: Cannot find scanImage method");
+	// Cache the async scan methods
+	m_submit_method = p_env->GetMethodID(m_bridge_class, "submitImage", "([BIII)Z");
+	m_poll_method = p_env->GetMethodID(m_bridge_class, "pollResult", "()[B");
+	if (!m_submit_method || !m_poll_method) {
+		ALOGE("Godot ARCore QR: Cannot find submitImage/pollResult methods");
 		if (p_env->ExceptionCheck()) {
-			ALOGE("Godot ARCore QR: JNI Exception during GetMethodID(scanImage)");
 			p_env->ExceptionDescribe();
 			p_env->ExceptionClear();
 		}
 		return;
 	}
-	ALOGV("Godot ARCore QR: Found scanImage method: %p", m_scan_method);
 
 	m_initialized = true;
 	ALOGV("Godot ARCore QR: QRScanner initialized successfully");
@@ -97,7 +96,9 @@ void QRScanner::uninitialize() {
 			m_bridge_class = nullptr;
 		}
 	}
-	m_scan_method = nullptr;
+	m_submit_method = nullptr;
+	m_poll_method = nullptr;
+	m_scan_in_flight = false;
 	m_initialized = false;
 }
 
@@ -114,6 +115,7 @@ void QRScanner::start() {
 
 void QRScanner::stop() {
 	m_scanning = false;
+	m_discard_result = m_scan_in_flight; // its result belongs to the stopped session
 	m_active_detections.clear();
 	ALOGV("Godot ARCore QR: Scanning stopped");
 }
@@ -147,9 +149,13 @@ bool QRScanner::process(ArSession &p_ar_session, ArFrame &p_ar_frame) {
 	m_new_detections.clear();
 	m_lost_codes.clear();
 
-	// Throttle: only scan every N frames
+	if (m_scan_in_flight) {
+		_poll_result(p_ar_session, p_ar_frame);
+	}
+
+	// Throttle: only scan every N frames, and only when ML Kit is free
 	m_frame_counter++;
-	if (m_frame_counter >= m_scan_interval) {
+	if (m_frame_counter >= m_scan_interval && !m_scan_in_flight) {
 		m_frame_counter = 0;
 		ALOGV("Godot ARCore QR: Scanning frame %d", m_current_frame);
 		_scan_frame(p_ar_session, p_ar_frame);
@@ -245,7 +251,7 @@ void QRScanner::_scan_frame(ArSession &p_ar_session, ArFrame &p_ar_frame) {
 
 	// Call Java bridge to scan
 	JNIEnv *env = ARCoreWrapper::get_env_for_current_thread();
-	if (!env || !m_bridge_instance || !m_scan_method) {
+	if (!env || !m_bridge_instance || !m_submit_method) {
 		ArImage_release(ar_image);
 		return;
 	}
@@ -283,154 +289,176 @@ void QRScanner::_scan_frame(ArSession &p_ar_session, ArFrame &p_ar_frame) {
 		ALOGV("Godot ARCore QR: Padded UV plane with %d zero bytes", padding);
 	}
 
-	// Call scanImage(byte[] data, int width, int height, int rotation)
-	// rotation = 0 since ARCore gives us correctly oriented image
-	ALOGV("Godot ARCore QR: Calling scanImage() with %dx%d image, buffer size %d bytes (Y:%d + UV:%d padded to %d)", 
-		width, height, expected_total, (int)y_data_length, (int)uv_data_length, expected_uv_size);
-	jbyteArray results = (jbyteArray)env->CallObjectMethod(
-			m_bridge_instance, m_scan_method, j_data, (jint)width, (jint)height, (jint)0);
-
-	// Check for JNI exceptions after calling
+	// Hand the image to ML Kit and return at once; the result is picked up in a later frame
+	// (_poll_result), so the render thread does not wait for the scan.
+	jboolean accepted = env->CallBooleanMethod(
+			m_bridge_instance, m_submit_method, j_data, (jint)width, (jint)height, (jint)0);
 	if (env->ExceptionCheck()) {
-		ALOGE("Godot ARCore QR: JNI exception in scanImage() - details:");
+		ALOGE("Godot ARCore QR: JNI exception in submitImage()");
 		env->ExceptionDescribe();
 		env->ExceptionClear();
-		env->DeleteLocalRef(j_data);
-		ArImage_release(ar_image);
-		return;
+		accepted = JNI_FALSE;
 	}
-
 	env->DeleteLocalRef(j_data);
 
-	if (results) {
-		int result_bytes = env->GetArrayLength(results);
-		ALOGV("Godot ARCore QR: scanImage() returned %d bytes", result_bytes);
-
-		if (result_bytes < 4) {
-			ALOGE("Godot ARCore QR: scanImage() returned malformed payload: %d bytes", result_bytes);
-			env->DeleteLocalRef(results);
-			ArImage_release(ar_image);
-			return;
+	if (accepted) {
+		m_scan_in_flight = true;
+		m_scan_width = width;
+		m_scan_height = height;
+		if (m_capture_detected_images) {
+			// The ArImage is released below; keep the Y plane for cropping the detections.
+			m_scan_y.resize(width * height);
+			memcpy(m_scan_y.ptrw(), y_data, MIN((int)y_data_length, width * height));
+		} else {
+			m_scan_y.clear();
 		}
-
-		jbyte *raw_payload = env->GetByteArrayElements(results, nullptr);
-		if (!raw_payload) {
-			env->DeleteLocalRef(results);
-			ArImage_release(ar_image);
-			return;
-		}
-
-		const uint8_t *ptr = reinterpret_cast<const uint8_t *>(raw_payload);
-		const uint8_t *end = ptr + result_bytes;
-
-		auto read_u32_le = [&ptr, end](uint32_t &out_value) -> bool {
-			if (end - ptr < 4) {
-				return false;
-			}
-			out_value = (uint32_t)ptr[0] |
-						((uint32_t)ptr[1] << 8) |
-						((uint32_t)ptr[2] << 16) |
-						((uint32_t)ptr[3] << 24);
-			ptr += 4;
-			return true;
-		};
-
-		uint32_t detection_count = 0;
-		if (!read_u32_le(detection_count)) {
-			ALOGE("Godot ARCore QR: Failed to read detection count from payload");
-			env->ReleaseByteArrayElements(results, raw_payload, JNI_ABORT);
-			env->DeleteLocalRef(results);
-			ArImage_release(ar_image);
-			return;
-		}
-
-		for (uint32_t i = 0; i < detection_count; i++) {
-			uint32_t left_u32 = 0;
-			uint32_t top_u32 = 0;
-			uint32_t right_u32 = 0;
-			uint32_t bottom_u32 = 0;
-			uint32_t data_len = 0;
-			uint32_t format_len = 0;
-
-			if (!read_u32_le(left_u32) ||
-					!read_u32_le(top_u32) ||
-					!read_u32_le(right_u32) ||
-					!read_u32_le(bottom_u32) ||
-					!read_u32_le(data_len)) {
-				ALOGE("Godot ARCore QR: Malformed payload while reading detection header %u/%u", i + 1, detection_count);
-				break;
-			}
-
-			if (data_len > (uint32_t)(end - ptr)) {
-				ALOGE("Godot ARCore QR: Malformed payload while reading detection data %u/%u", i + 1, detection_count);
-				break;
-			}
-
-			String qr_data = String::utf8(reinterpret_cast<const char *>(ptr), (int)data_len);
-			ptr += data_len;
-
-			if (!read_u32_le(format_len)) {
-				ALOGE("Godot ARCore QR: Malformed payload while reading detection format length %u/%u", i + 1, detection_count);
-				break;
-			}
-
-			if (format_len > (uint32_t)(end - ptr)) {
-				ALOGE("Godot ARCore QR: Malformed payload while reading detection format %u/%u", i + 1, detection_count);
-				break;
-			}
-
-			String qr_format = String::utf8(reinterpret_cast<const char *>(ptr), (int)format_len);
-			ptr += format_len;
-
-			int left = (int)left_u32;
-			int top = (int)top_u32;
-			int right = (int)right_u32;
-			int bottom = (int)bottom_u32;
-
-			bool is_new = !m_active_detections.has(qr_data);
-
-			QRDetection detection;
-			detection.data = qr_data;
-			detection.format = qr_format;
-			detection.bounds_left = left;
-			detection.bounds_top = top;
-			detection.bounds_right = right;
-			detection.bounds_bottom = bottom;
-			{
-				// The camera image has its own size and rotation and is cropped to fill the screen:
-				// let ARCore map the corners (it knows the current display geometry).
-				const float corners[8] = { (float)left, (float)top, (float)right, (float)top,
-					(float)right, (float)bottom, (float)left, (float)bottom };
-				float view[8];
-				ArFrame_transformCoordinates2d(ar_session_ptr, ar_frame_ptr,
-						AR_COORDINATES_2D_IMAGE_PIXELS, 4, corners, AR_COORDINATES_2D_VIEW, view);
-				Rect2 r(Vector2(view[0], view[1]), Vector2());
-				for (int c = 1; c < 4; c++) {
-					r = r.expand(Vector2(view[c * 2], view[c * 2 + 1]));
-				}
-				detection.screen_bounds = r;
-			}
-			detection.frame_detected = m_current_frame;
-			if (m_capture_detected_images) {
-				detection.cropped_image = _crop_image_region(y_data, width, height,
-						left, top, right, bottom);
-			}
-
-			m_active_detections.insert(qr_data, detection);
-
-			if (is_new) {
-				m_new_detections.push_back(detection);
-				ALOGV("Godot ARCore QR: New code detected: %s [%s]", qr_data.ascii().ptr(), qr_format.ascii().ptr());
-			}
-		}
-
-		env->ReleaseByteArrayElements(results, raw_payload, JNI_ABORT);
-		env->DeleteLocalRef(results);
-	} else {
-		ALOGE("Godot ARCore QR: scanImage() returned null results");
 	}
 
 	ArImage_release(ar_image);
+}
+
+void QRScanner::_poll_result(ArSession &p_ar_session, ArFrame &p_ar_frame) {
+	JNIEnv *env = ARCoreWrapper::get_env_for_current_thread();
+	if (!env || !m_bridge_instance || !m_poll_method) {
+		return;
+	}
+	jbyteArray results = (jbyteArray)env->CallObjectMethod(m_bridge_instance, m_poll_method);
+	if (env->ExceptionCheck()) {
+		env->ExceptionDescribe();
+		env->ExceptionClear();
+		return;
+	}
+	if (!results) {
+		return; // still scanning
+	}
+	m_scan_in_flight = false;
+	if (m_discard_result) {
+		m_discard_result = false;
+	} else {
+		_apply_result(env, results, &p_ar_session, &p_ar_frame);
+	}
+	env->DeleteLocalRef(results);
+}
+
+// Parses a packed ML Kit result. Bounds are mapped to the screen with the current frame: one or
+// two frames newer than the scanned image, which is fine for an overlay.
+void QRScanner::_apply_result(JNIEnv *p_env, jbyteArray p_results, ArSession *p_ar_session, ArFrame *p_ar_frame) {
+	int result_bytes = p_env->GetArrayLength(p_results);
+	ALOGV("Godot ARCore QR: ML Kit returned %d bytes", result_bytes);
+
+	if (result_bytes < 4) {
+		ALOGE("Godot ARCore QR: ML Kit returned malformed payload: %d bytes", result_bytes);
+		return;
+	}
+
+	jbyte *raw_payload = p_env->GetByteArrayElements(p_results, nullptr);
+	if (!raw_payload) {
+		return;
+	}
+
+	const uint8_t *ptr = reinterpret_cast<const uint8_t *>(raw_payload);
+	const uint8_t *end = ptr + result_bytes;
+
+	auto read_u32_le = [&ptr, end](uint32_t &out_value) -> bool {
+		if (end - ptr < 4) {
+			return false;
+		}
+		out_value = (uint32_t)ptr[0] |
+					((uint32_t)ptr[1] << 8) |
+					((uint32_t)ptr[2] << 16) |
+					((uint32_t)ptr[3] << 24);
+		ptr += 4;
+		return true;
+	};
+
+	uint32_t detection_count = 0;
+	if (!read_u32_le(detection_count)) {
+		ALOGE("Godot ARCore QR: Failed to read detection count from payload");
+		p_env->ReleaseByteArrayElements(p_results, raw_payload, JNI_ABORT);
+		return;
+	}
+
+	for (uint32_t i = 0; i < detection_count; i++) {
+		uint32_t left_u32 = 0;
+		uint32_t top_u32 = 0;
+		uint32_t right_u32 = 0;
+		uint32_t bottom_u32 = 0;
+		uint32_t data_len = 0;
+		uint32_t format_len = 0;
+
+		if (!read_u32_le(left_u32) ||
+				!read_u32_le(top_u32) ||
+				!read_u32_le(right_u32) ||
+				!read_u32_le(bottom_u32) ||
+				!read_u32_le(data_len)) {
+			ALOGE("Godot ARCore QR: Malformed payload while reading detection header %u/%u", i + 1, detection_count);
+			break;
+		}
+
+		if (data_len > (uint32_t)(end - ptr)) {
+			ALOGE("Godot ARCore QR: Malformed payload while reading detection data %u/%u", i + 1, detection_count);
+			break;
+		}
+
+		String qr_data = String::utf8(reinterpret_cast<const char *>(ptr), (int)data_len);
+		ptr += data_len;
+
+		if (!read_u32_le(format_len)) {
+			ALOGE("Godot ARCore QR: Malformed payload while reading detection format length %u/%u", i + 1, detection_count);
+			break;
+		}
+
+		if (format_len > (uint32_t)(end - ptr)) {
+			ALOGE("Godot ARCore QR: Malformed payload while reading detection format %u/%u", i + 1, detection_count);
+			break;
+		}
+
+		String qr_format = String::utf8(reinterpret_cast<const char *>(ptr), (int)format_len);
+		ptr += format_len;
+
+		int left = (int)left_u32;
+		int top = (int)top_u32;
+		int right = (int)right_u32;
+		int bottom = (int)bottom_u32;
+
+		bool is_new = !m_active_detections.has(qr_data);
+
+		QRDetection detection;
+		detection.data = qr_data;
+		detection.format = qr_format;
+		detection.bounds_left = left;
+		detection.bounds_top = top;
+		detection.bounds_right = right;
+		detection.bounds_bottom = bottom;
+		{
+			// The camera image has its own size and rotation and is cropped to fill the screen:
+			// let ARCore map the corners (it knows the current display geometry).
+			const float corners[8] = { (float)left, (float)top, (float)right, (float)top,
+				(float)right, (float)bottom, (float)left, (float)bottom };
+			float view[8];
+			ArFrame_transformCoordinates2d(p_ar_session, p_ar_frame,
+					AR_COORDINATES_2D_IMAGE_PIXELS, 4, corners, AR_COORDINATES_2D_VIEW, view);
+			Rect2 r(Vector2(view[0], view[1]), Vector2());
+			for (int c = 1; c < 4; c++) {
+				r = r.expand(Vector2(view[c * 2], view[c * 2 + 1]));
+			}
+			detection.screen_bounds = r;
+		}
+		detection.frame_detected = m_current_frame;
+		if (m_capture_detected_images && !m_scan_y.is_empty()) {
+			detection.cropped_image = _crop_image_region(m_scan_y.ptr(), m_scan_width, m_scan_height,
+					left, top, right, bottom);
+		}
+
+		m_active_detections.insert(qr_data, detection);
+
+		if (is_new) {
+			m_new_detections.push_back(detection);
+			ALOGV("Godot ARCore QR: New code detected: %s [%s]", qr_data.ascii().ptr(), qr_format.ascii().ptr());
+		}
+	}
+
+	p_env->ReleaseByteArrayElements(p_results, raw_payload, JNI_ABORT);
 }
 
 Ref<Image> QRScanner::get_detected_image(const String &p_qr_data) {

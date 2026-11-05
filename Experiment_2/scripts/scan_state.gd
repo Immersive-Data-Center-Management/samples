@@ -18,6 +18,10 @@ extends FlowState
 
 ## QR codes currently in view: content -> true if it is the part to find.
 var _seen := {}
+## Drawn box per code (window pixels), eased toward the latest scan so the mark glides.
+var _drawn := {}
+## How fast a mark follows its code (per second); higher = snappier, lower = smoother.
+const FOLLOW_SPEED := 25.0
 
 
 func _ready() -> void:
@@ -37,6 +41,7 @@ func enter_state() -> void:
 	result_label.text = ""
 	continue_button.hide()
 	_seen.clear()
+	_drawn.clear()
 	marks.queue_redraw()
 	debug_input.text = t.get("shell_id", "")
 
@@ -49,6 +54,11 @@ func _set_scanning(on: bool) -> void:
 	var ar := get_tree().get_first_node_in_group("arcore_init") as ARCoreInit
 	if ar and ar.arcore_started:
 		ar.set_feature_enabled(ARCoreInit.FEAT_QR_SCANNING, on)
+		# Scan every 3rd frame (~10 scans/s at 30 fps); the marks glide in between. Scans run off the
+		# render thread, so a lower value costs no frame time, only battery.
+		ARCoreInterfaceInstance.qr_scanner_set_scan_interval(3)
+		# A code counts as lost after 0.66 s without a scan hit: marks and the button go away quickly.
+		ARCoreInterfaceInstance.qr_scanner_set_lost_timeout(0.66)
 
 
 func _on_scanned(data: String) -> void:
@@ -75,22 +85,29 @@ func _on_scanned(data: String) -> void:
 
 func _on_lost(data: String) -> void:
 	_seen.erase(data)
+	_drawn.erase(data)
 	marks.queue_redraw()
 	if data == AppData.task.get("shell_id") and continue_button.visible:
 		continue_button.hide()  # right part out of view: scan it again before going on
 		result_label.text = "Right part out of view. Point the camera at %s again." % AppData.task["identifier"]
 
 
-func _process(_delta: float) -> void:
-	if not _seen.is_empty():
-		marks.queue_redraw()  # the codes move with the camera image
+func _process(delta: float) -> void:
+	if _seen.is_empty():
+		return
+	var t := 1.0 - exp(-FOLLOW_SPEED * delta)  # frame-rate independent easing
+	for data in _seen:
+		var target := ARCoreInterfaceInstance.qr_scanner_get_detected_screen_bounds(data)
+		var r: Rect2 = _drawn.get(data, target)
+		_drawn[data] = Rect2(r.position.lerp(target.position, t), r.size.lerp(target.size, t))
+	marks.queue_redraw()  # the codes move with the camera image
 
 
 func _draw_marks() -> void:
 	# Screen bounds are window pixels; map them into Marks' local space (the state is DPI-scaled).
 	var to_local := (marks.get_viewport().get_final_transform() * marks.get_global_transform_with_canvas()).affine_inverse()
 	for data in _seen:
-		var r: Rect2 = to_local * ARCoreInterfaceInstance.qr_scanner_get_detected_screen_bounds(data)
+		var r: Rect2 = to_local * _drawn.get(data, Rect2())
 		if not r.has_area():
 			continue
 		var ok: bool = _seen[data]
