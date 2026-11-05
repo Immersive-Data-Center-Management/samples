@@ -126,6 +126,7 @@ public:
 	bool qr_scanner_get_capture_detected_images() const;
 	godot::Ref<godot::Image> qr_scanner_get_detected_image(const godot::String &p_qr_data);
 	godot::Rect2 qr_scanner_get_detected_bounds(const godot::String &p_qr_data) const;
+	godot::Rect2 qr_scanner_get_detected_screen_bounds(const godot::String &p_qr_data) const;
 #endif
 
 	void image_tracker_database_create();

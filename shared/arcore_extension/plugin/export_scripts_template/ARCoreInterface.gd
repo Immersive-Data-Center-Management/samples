@@ -245,6 +245,13 @@ func qr_scanner_get_detected_bounds(data: String) -> Rect2:
 		return arcore_interface.qr_scanner_get_detected_bounds(data)
 	return Rect2()
 
+## Bounds of an active QR code in screen pixels (window coordinates), where it shows on the
+## camera background. Empty Rect2 if the code is not currently detected.
+func qr_scanner_get_detected_screen_bounds(data: String) -> Rect2:
+	if arcore_interface:
+		return arcore_interface.qr_scanner_get_detected_screen_bounds(data)
+	return Rect2()
+
 func point_cloud_get_points():
 	if arcore_interface:
 		return arcore_interface.point_cloud_get_points()

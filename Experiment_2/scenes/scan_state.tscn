@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/scan_state.gd" id="1_s"]
 [ext_resource type="Script" path="res://addons/sample_framework_ar/QRCodeTrackedComponent.gd" id="2_qr"]
+[ext_resource type="Theme" path="res://ui/primary_button.tres" id="primary_theme"]
 
 [node name="Scan" type="Control"]
 layout_mode = 3
@@ -15,6 +16,16 @@ mouse_filter = 2
 
 [node name="QRCodeTrackedComponent" type="Node" parent="."]
 script = ExtResource("2_qr")
+
+[node name="Marks" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -67,6 +78,15 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = ""
 placeholder_text = "Desktop: QR content, Enter = scan"
+
+[node name="ContinueButton" type="Button" parent="Margin/VBox"]
+theme = ExtResource("primary_theme")
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 88)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Check this part  →"
 
 [node name="BackButton" type="Button" parent="Margin/VBox"]
 unique_name_in_owner = true

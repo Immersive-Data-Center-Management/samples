@@ -20,7 +20,7 @@ registers it on Android and wraps the native calls:
 | Camera feed as background, device pose | `start()`, `get_tracking_status()`, `get_camera_feed()`, `get_camera_rgba_texture()` |
 | ARCore's real projection (for picking that matches the image) | `get_projection_matrix()`, `get_camera_fov()` |
 | Image tracking | `image_tracker_database_add_image()`, `image_tracker_get_tracked_transform()`, … |
-| QR codes (Google ML Kit) | `qr_scanner_start()`, signals `qr_code_found` / `qr_code_lost`, `qr_scanner_get_detected_bounds()` |
+| QR codes (Google ML Kit) | `qr_scanner_start()`, signals `qr_code_found` / `qr_code_lost`, `qr_scanner_get_detected_bounds()` (camera-image pixels), `qr_scanner_get_detected_screen_bounds()` (screen pixels, for overlays) |
 | Planes, point cloud, depth, light estimation | `enable_*()`, `plane_tracker_*()`, `point_cloud_get_points()` |
 | Hit tests | `raycast()`, `screenRayCast()` |
 | Freeze ("inspect mode") | `set_ar_frozen()`: holds pose and image while ARCore keeps tracking |

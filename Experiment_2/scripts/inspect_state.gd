@@ -19,6 +19,8 @@ const LABELS := {
 	"Temperature": "Temperature",
 	"PowerDraw": "Power draw",
 }
+## Green style for whichever control is the next step.
+const PRIMARY := preload("res://ui/primary_button.tres")
 ## How often the live values are re-read while this screen is open.
 const POLL_SECONDS := 3.0
 
@@ -40,8 +42,11 @@ var _refreshing := false
 
 
 func _ready() -> void:
+	finding.add_item("Select what you see …")  # placeholder: the technician has to choose
+	finding.set_item_disabled(0, true)
 	for f in FINDINGS:
 		finding.add_item(f)
+	finding.item_selected.connect(func(_i): _update_send())
 	photo_button.pressed.connect(_on_photo_pressed)
 	send_button.pressed.connect(_on_send_pressed)
 	%NoCameraLabel.visible = not OS.has_feature("mobile")
@@ -54,8 +59,8 @@ func enter_state() -> void:
 	_photo_taken = false
 	photo_rect.texture = null
 	photo_button.text = "Take photo"
-	send_button.disabled = false
-	status_label.text = ""
+	finding.select(0)
+	_update_send()
 	var t := AppData.task
 	title_label.text = "%s  ·  U %s" % [t["identifier"], t["position_from"]]
 	_load_nameplate(t)
@@ -90,12 +95,29 @@ func _refresh_live() -> void:
 	data_list.show_props(props)
 
 
+## Send only with a photo taken and a finding picked. The next step is shown green: photo,
+## then finding, then send; the status line says what is missing.
+func _update_send() -> void:
+	var has_finding := finding.selected > 0
+	var missing: Array[String] = []
+	if not _photo_taken:
+		missing.append("take a photo")
+	if not has_finding:
+		missing.append("pick what you see")
+	send_button.disabled = not missing.is_empty()
+	status_label.text = "To send the report: %s." % " and ".join(missing) if missing else ""
+	var next: Control = photo_button if not _photo_taken else finding if not has_finding else send_button
+	for c: Control in [photo_button, finding, send_button]:
+		c.theme = PRIMARY if c == next else null
+
+
 func _on_photo_pressed() -> void:
 	# The camera feed is the main viewport's background; hide the panel for the shot.
 	var img := await ScreenCapture.capture(get_viewport(), [ui, background, %NoCameraLabel])
 	photo_rect.texture = ImageTexture.create_from_image(img)
 	_photo_taken = true
 	photo_button.text = "✓ Photo taken · retake"
+	_update_send()
 	# Short white flash, like a camera shutter.
 	var flash: ColorRect = %Flash
 	flash.modulate.a = 0.8
@@ -122,8 +144,8 @@ func _on_send_pressed() -> void:
 		await get_tree().create_timer(1.2).timeout
 		finish()
 	else:
-		status_label.text = "Sending failed. Check the connection and try again."
 		send_button.disabled = false
+		status_label.text = "Sending failed. Check the connection and try again."
 
 
 static func _prop(id_short: String, value: String) -> Dictionary:

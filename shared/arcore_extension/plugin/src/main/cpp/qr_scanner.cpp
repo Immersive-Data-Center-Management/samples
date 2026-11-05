@@ -396,6 +396,20 @@ void QRScanner::_scan_frame(ArSession &p_ar_session, ArFrame &p_ar_frame) {
 			detection.bounds_top = top;
 			detection.bounds_right = right;
 			detection.bounds_bottom = bottom;
+			{
+				// The camera image has its own size and rotation and is cropped to fill the screen:
+				// let ARCore map the corners (it knows the current display geometry).
+				const float corners[8] = { (float)left, (float)top, (float)right, (float)top,
+					(float)right, (float)bottom, (float)left, (float)bottom };
+				float view[8];
+				ArFrame_transformCoordinates2d(ar_session_ptr, ar_frame_ptr,
+						AR_COORDINATES_2D_IMAGE_PIXELS, 4, corners, AR_COORDINATES_2D_VIEW, view);
+				Rect2 r(Vector2(view[0], view[1]), Vector2());
+				for (int c = 1; c < 4; c++) {
+					r = r.expand(Vector2(view[c * 2], view[c * 2 + 1]));
+				}
+				detection.screen_bounds = r;
+			}
 			detection.frame_detected = m_current_frame;
 			if (m_capture_detected_images) {
 				detection.cropped_image = _crop_image_region(y_data, width, height,
@@ -435,6 +449,13 @@ Rect2 QRScanner::get_detected_bounds(const String &p_qr_data) const {
 	return Rect2(
 			Vector2(detection.bounds_left, detection.bounds_top),
 			Vector2(detection.bounds_right - detection.bounds_left, detection.bounds_bottom - detection.bounds_top));
+}
+
+Rect2 QRScanner::get_detected_screen_bounds(const String &p_qr_data) const {
+	if (!m_active_detections.has(p_qr_data)) {
+		return Rect2();
+	}
+	return m_active_detections[p_qr_data].screen_bounds;
 }
 
 Ref<Image> QRScanner::_crop_image_region(const uint8_t *p_yuv_data, int p_width, int p_height,

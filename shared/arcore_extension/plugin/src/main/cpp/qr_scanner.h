@@ -21,6 +21,7 @@ struct QRDetection {
 	int bounds_top;
 	int bounds_right;
 	int bounds_bottom;
+	godot::Rect2 screen_bounds; // bounds in Android view pixels (same space as the display geometry)
 	int frame_detected;
 	godot::Ref<godot::Image> cropped_image;
 };
@@ -48,6 +49,10 @@ public:
 	/// Get the last detected screen-space bounds of a QR code in camera-image pixels.
 	/// Returns an empty rect if the code is not in the active detections cache.
 	godot::Rect2 get_detected_bounds(const godot::String &p_qr_data) const;
+
+	/// Get the last detected bounds of a QR code in screen (Android view) pixels, i.e. where it
+	/// appears on the camera background. Returns an empty rect if the code is not active.
+	godot::Rect2 get_detected_screen_bounds(const godot::String &p_qr_data) const;
 
 	/// Enable or disable capturing cropped camera images for detections.
 	/// Disabled by default to avoid per-detection image allocations.

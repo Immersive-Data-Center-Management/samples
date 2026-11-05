@@ -70,6 +70,7 @@ void ARCoreInterface::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("qr_scanner_get_capture_detected_images"), &ARCoreInterface::qr_scanner_get_capture_detected_images);
 	ClassDB::bind_method(D_METHOD("qr_scanner_get_detected_image", "qr_data"), &ARCoreInterface::qr_scanner_get_detected_image);
 	ClassDB::bind_method(D_METHOD("qr_scanner_get_detected_bounds", "qr_data"), &ARCoreInterface::qr_scanner_get_detected_bounds);
+	ClassDB::bind_method(D_METHOD("qr_scanner_get_detected_screen_bounds", "qr_data"), &ARCoreInterface::qr_scanner_get_detected_screen_bounds);
 
 	ADD_SIGNAL(MethodInfo("qr_code_found", PropertyInfo(Variant::STRING, "data"), PropertyInfo(Variant::STRING, "format")));
 	ADD_SIGNAL(MethodInfo("qr_code_lost", PropertyInfo(Variant::STRING, "data")));
@@ -512,6 +513,10 @@ godot::Ref<godot::Image> ARCoreInterface::qr_scanner_get_detected_image(const go
 
 godot::Rect2 ARCoreInterface::qr_scanner_get_detected_bounds(const godot::String &p_qr_data) const {
 	return m_qr_scanner.get_detected_bounds(p_qr_data);
+}
+
+godot::Rect2 ARCoreInterface::qr_scanner_get_detected_screen_bounds(const godot::String &p_qr_data) const {
+	return m_qr_scanner.get_detected_screen_bounds(p_qr_data);
 }
 #endif // ARCORE_FEATURE_QR_SCANNER
 

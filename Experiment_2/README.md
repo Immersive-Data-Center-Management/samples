@@ -34,9 +34,10 @@ What it shows:
    DemoServer02 `unreachable`, so the technician gets a (fictional) service ticket: "Check DemoServer02 · Go to Rack
    01, U 3". Below it the rack in 3D, DemoServer02 marked. *Last report* shows the previous report, if there is one.
 3. **Scan** – scan the QR codes. A wrong part shows where the right one is ("This is DemoServer01 (U 2). You are
-   looking for DemoServer02, 1 U above."). The right one opens the inspection.
+   looking for DemoServer02, 1 U above."). Every code in view gets a ✓ (right part) or ✗ on
+   the camera image, which helps when several codes are in view. The right one shows a button that opens the inspection.
 4. **Inspect** – the camera image of the real server on top, its nameplate and live values (polled every 3 s) below,
-   a visual finding from a dropdown and a photo of the server. *Send report* writes `LastInspection` (time,
+   a visual finding from a dropdown and a photo of the server (both required). *Send report* writes `LastInspection` (time,
    technician name, finding, whether a photo was taken). The photo itself is not uploaded.
 5. Back at the task, *Last report* now shows the new report. The server stays `unreachable`: checking is not fixing.
 

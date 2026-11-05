@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/task_state.gd" id="1_s"]
 [ext_resource type="Script" path="res://addons/sample_framework_core/orbit_controller.gd" id="2_cam"]
 [ext_resource type="Script" path="res://addons/sample_framework_core/stage_selection.gd" id="3_sel"]
+[ext_resource type="Theme" path="res://ui/primary_button.tres" id="primary_theme"]
 
 [sub_resource type="Environment" id="Env_task"]
 background_mode = 1
@@ -185,6 +186,7 @@ horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="CheckButton" type="Button" parent="Margin/VBox"]
+theme = ExtResource("primary_theme")
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
