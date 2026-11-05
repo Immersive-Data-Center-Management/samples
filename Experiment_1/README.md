@@ -13,7 +13,7 @@ IDTXFlow is a GDExtension that adds it.
 The app logs in via Keycloak, lists the racks from an Asset Administration Shell (AAS) server and shows the selected
 rack in 3D. The server rack and every installed component are **USD assets that IDTXFlow downloads over HTTP and
 loads at runtime**. None of the 3D models are imported into the Godot project. Clicking a part shows its nameplate
-data from the AAS.
+data and live values from the AAS.
 
 <img src="docs/login.png" alt="Login screen" width="49%"> <img src="docs/3d_viewer.png" alt="3D viewer with a rack, the hierarchy and the details panel" width="49%">
 
@@ -33,35 +33,38 @@ The experiment demonstrates three things:
 1. **Login** – the app gets an access token from Keycloak (password grant, realm `BaSyx`, client `basyx-client-api`).
    The token URL is derived from the AAS URL: same host, port `8180`. Every AAS request sends the token as a bearer
    token. On HTTP 401 the app returns to the login screen.
-2. **Rack list** – every shell with a *RackUsage* submodel is a rack. The label is the shell's `idShort` plus the
-   `ManufacturerProductDesignation` from its *Nameplate* submodel.
+2. **Rack list** – every shell with a *HierarchicalStructures* (bill of material) submodel is a rack. The label is
+   the shell's `idShort`, the `ManufacturerProductDesignation` from its *Nameplate* submodel, and the number of
+   installed components and rack units from the bill of material.
 3. **3D viewer** – the app loads the rack's USD file and adds one USD payload per installed component, placed at
    the rack slot given by its `PositionFrom` value.
 4. **Details** – clicking a component shows its rack height and position, plus the top-level elements of the
-   *Nameplate* submodel of that component's shell (multi-language texts in English).
+   *Nameplate* submodel of that component's shell (multi-language texts in English), and its live `Status`,
+   `Temperature` and `PowerDraw` from *OperationalData*, re-read every 3 s (the demo stack's simulator changes them).
 
 #### Data read from the AAS
 
 | Submodel (semantic id) | Read from | Used for |
 |---|---|---|
-| RackUsage (`urn:apeirora.eu:smt:rackUsage:0.1`) | rack shell | `InstalledComponents`: per component the asset id (`Entity.globalAssetId`), `HeightUnits`, `PositionFrom` |
-| 3D assets (`urn:apeirora.eu:smt:3dAssets:0.1`) | rack and component shells | first `File` element = URL of the USD file |
-| Nameplate (`https://admin-shell.io/idta/nameplate/3/0/Nameplate`) | rack and component shells | list label and details panel |
+| HierarchicalStructures (IDTA 02011) | rack shell | per installed component (Node entity) the asset id, `HeightUnits`, `PositionFrom` |
+| Models3D (IDTA 02026) | rack and component shells | `DigitalFile` = URL of the USD file |
+| Nameplate (IDTA 02006) | rack and component shells | list label and details panel |
+| OperationalData (own) | component shells | live values in the details panel (polled) |
 
 A component is linked to its shell by matching the component's `globalAssetId` with the shell's
-`assetInformation.globalAssetId`.
+`assetInformation.globalAssetId`. Semantic ids and structure: [AAS data model](../shared/deploy/README.md#aas-data-model).
 
 #### USD files
 
-The USD files live in [`deploy/assets/`](deploy/assets/) and are served over HTTP. The AAS only stores their URLs.
-The committed files are simple, generated placeholders on purpose: they are license-safe and only a few KB. The app
-makes no assumptions about the geometry, so any USD file that follows the asset contract works, including detailed
-CAD models. See [`deploy/assets/README.md`](deploy/assets/README.md) for the contract (root prim, Z-up, bottom at
-Z=0, select colliders) and the script that generates the placeholders.
+The USD files live in [`shared/deploy/assets/`](../shared/deploy/assets/) and are served over HTTP. The AAS only stores their URLs.
+The committed models are our own, built with a Blender script, and a few hundred KB each. The app makes no
+assumptions about the geometry, so any USD file that follows the asset contract works, including detailed CAD models.
+See [`shared/deploy/assets/README.md`](../shared/deploy/assets/README.md) for the contract (root prim, Z-up, slot 0 height,
+select colliders) and how to rebuild the models.
 
 #### Asset hosting
 
-The `assets` service in the demo stack is nginx serving `deploy/assets/` read-only under `/api/v1/download/<file>`.
+The `assets` service in the demo stack is nginx serving `shared/deploy/assets/` read-only under `/api/v1/download/<file>`.
 It has no authentication, no upload and no versioning. idtx-core can be used as an alternative asset host, since it
 uses the same download URL shape, but this sample does not use it.
 
@@ -71,86 +74,77 @@ uses the same download URL shape, but this sample does not use it.
 
 - Windows (tested). macOS on Apple Silicon should work too, but is not tested; see below.
 - Godot 4.7.2
-- IDTXFlow 0.6.0, installed into `addons/IDTXFlow` by `bootstrap.ps1` (not checked in)
+- IDTXFlow 0.6.1, installed into `addons/IDTXFlow` by `bootstrap.ps1` (not checked in)
 - An AAS server with Keycloak: the demo stack below, or your own
 
-**macOS (untested):** the app code has nothing Windows-specific, and IDTXFlow 0.6.0 also ships an Apple Silicon
+**macOS (untested):** the app code has nothing Windows-specific, and IDTXFlow 0.6.1 also ships an Apple Silicon
 (arm64) build. Intel Macs are not supported. `bootstrap.ps1` only fetches the Windows build, so install it by hand:
 download
-[`gdextension-macOS.zip`](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/download/v0.6.0/gdextension-macOS.zip)
+[`gdextension-macOS.zip`](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/download/v0.6.1/gdextension-macOS.zip)
 and copy its `artifacts/gdextension/IDTXFlow/` folder to `addons/IDTXFlow/`. The zip has a different layout than the
 Windows one. If macOS blocks the downloaded libraries, run `xattr -dr com.apple.quarantine addons/IDTXFlow`.
 
 ### Demo stack
 
-[`deploy/`](deploy/README.md) contains a self-contained Keycloak + Eclipse BaSyx + nginx stack with fictional demo
-data (two racks with eleven components). It needs Docker with Compose v2; on Windows the tested setup is Docker
-Engine inside WSL2. From this folder (`Experiment_1/`; on Windows in a WSL shell):
+[`shared/deploy/`](../shared/deploy/README.md) contains a self-contained Keycloak + Eclipse BaSyx + nginx stack with
+fictional demo data (three racks with 30 components). Experiment 2 uses the same stack. It needs Docker with
+Compose v2; on Windows the tested setup is Docker Engine inside WSL2. From the repository root (on Windows in a WSL
+shell):
 
 ```bash
-cd deploy
+cd shared/deploy
 docker compose up -d
 ```
 
 Docker setup, the services and seed data, stopping and reseeding are described in
-[`deploy/README.md`](deploy/README.md).
+[`shared/deploy/README.md`](../shared/deploy/README.md).
 
 ### Run the app
 
 1. Make sure the demo stack (or your own AAS server) is running and the seed has finished. Without it, the login
    fails.
-2. Install IDTXFlow (once, and again after changing its version in the script). Close Godot first, because it
-   locks the DLLs. From this folder (`Experiment_1/`):
+2. Install IDTXFlow and link the shared addons. Skip it if you ran [`bootstrap_all.bat`](../bootstrap_all.bat) in the
+   repository root; otherwise it is needed once (and again after changing the IDTXFlow version). Close Godot first,
+   because it locks the DLLs. From this folder (`Experiment_1/`):
    ```powershell
-   powershell -ExecutionPolicy Bypass -File bootstrap.ps1
+   powershell -ExecutionPolicy Bypass -File bootstrap.ps1   # Bypass: Windows blocks unsigned scripts by default
    ```
-   The script only downloads the Windows binary release
-   ([`gdextension-Windows.zip`](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/download/v0.6.0/gdextension-Windows.zip)
-   from the [idtx-flow v0.6.0 release](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/tag/v0.6.0)),
+   The script calls [`shared/bootstrap.ps1`](../shared/bootstrap.ps1). It links `addons/sample_framework_core` and
+   `addons/sample_framework_aas` to `shared/addons/` and downloads the Windows binary release
+   ([`gdextension-Windows.zip`](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/download/v0.6.1/gdextension-Windows.zip)
+   from the [idtx-flow v0.6.1 release](https://github.com/Immersive-Data-Center-Management/idtx-flow/releases/tag/v0.6.1)),
    checks its SHA256 and unzips it to `addons/IDTXFlow/`. You can also skip it and do this by hand.
 3. Open `Experiment_1/project.godot` in Godot 4.7.2 and run the project (F5), or export it as a Windows executable.
 4. Log in. The server URL `http://127.0.0.1:8081` and user `demo` are prefilled; the password is `demo`.
    For your own server, enter its AAS URL. Keycloak must be on the same host at port 8180.
 5. Double-click a rack in the list to open the 3D viewer. Click a component to see its details.
 
-Tests: see [`tests/README.md`](tests/README.md).
-
 ### Viewer controls
 
 | Input | Action |
 |---|---|
-| Left click | Select rack or component (also in the hierarchy); empty space clears |
-| F | Focus the camera on the selection |
-| Right drag / Middle drag / Wheel | Orbit / pan / zoom |
-| W / S, A / D | Move the orbit center up / down, sideways |
+| Left click | Select rack or component (also in the hierarchy); empty space clears. The camera then orbits around it. |
+| F | Zoom to the selection |
+| Left drag / Right or middle drag / Wheel | Orbit / pan / zoom |
+| Touch: drag / two-finger drag / pinch | Orbit / pan / zoom |
 
 The hierarchy and details panels can be moved and resized.
 
 ### Code layout
 
-- `scripts/app_state.gd` – autoload: AAS URL and access token
-- `scripts/aas/` – `AasService` (REST client) and `RackComponents` (reads RackUsage, resolves models, builds the USD
-  session layer)
-- `scripts/screens/` + `scenes/screens/` – login, rack list, 3D viewer
-- `scripts/ui/` + `scenes/ui/` – floating panels: hierarchy and details
-- `scripts/viewer/` – orbit camera, picking and highlighting, grid floor; `materials/` holds their materials
-- `addons/IDTXFlow/` – USD loading GDExtension, downloaded by `bootstrap.ps1`
-- `deploy/` – demo stack, seed data and USD assets
-- `tests/` – offline checks for the AAS parsing
+- `scenes/main.tscn` + `scripts/main.gd` – the `StateManager` with the three screens in order
+- `scripts/screens/` + `scenes/screens/` – login, rack list, 3D viewer (each a `FlowState`)
+- `scripts/app_data.gd` – autoload `AppData`: the rack picked in the list (the login is the shared `Session`)
+- `scripts/ui/` + `scenes/ui/` – hierarchy and details panels
+- `scripts/viewer/grid_floor.gd`, `materials/grid.tres` – the floor grid
+- `addons/` – created by `bootstrap.ps1`: IDTXFlow, and links to the shared `sample_framework_aas` (`AasService`,
+  `KeycloakLogin`, `RackComponents`) and `sample_framework_core` (orbit camera, picking/highlighting, floating
+  panel), see
+  [`shared/README.md`](../shared/README.md)
 
 ## Licensing
 
-See the [repository README](../README.md#licensing). The following third-party components are not part of this
-repository. They are downloaded at setup time and come with their own licenses:
-
-| Component | Used for | Obtained via | License |
-|---|---|---|---|
-| [IDTXFlow](https://github.com/Immersive-Data-Center-Management/idtx-flow) 0.6.0 | USD loading in Godot | `bootstrap.ps1` into `addons/IDTXFlow/` | see its release (incl. `LICENSES-THIRD-PARTY/`) |
-| [Keycloak](https://www.keycloak.org/) 26.8.1 | login server (demo stack) | Docker image | Apache-2.0 |
-| [Eclipse BaSyx](https://eclipse.dev/basyx/) AAS environment 2.0.0-milestone-15 | AAS server (demo stack) | Docker image | MIT |
-| [nginx](https://nginx.org/) 1.30 | asset server (demo stack) | Docker image | BSD-2-Clause |
-| [Python](https://www.python.org/) 3.15 | runs the seed script (demo stack) | Docker image | PSF-2.0 |
-| [OpenUSD](https://openusd.org/) (`usd-core` 26.11) | only to regenerate or verify the placeholder assets | `pip install -r deploy/assets/requirements.txt` | Tomorrow Open Source Technology License 1.0 |
-
-The Docker images also contain a base OS (Alpine or UBI) with further packages under their own licenses. The licenses
-listed are those of the main projects.
+See the [repository README](../README.md#licensing). [IDTXFlow](https://github.com/Immersive-Data-Center-Management/idtx-flow)
+0.6.1 is downloaded by `bootstrap.ps1` into `addons/IDTXFlow/` and comes with its own licenses (see its release, incl.
+`LICENSES-THIRD-PARTY/`). The demo stack's components are listed in
+[`shared/deploy/README.md`](../shared/deploy/README.md#licensing).

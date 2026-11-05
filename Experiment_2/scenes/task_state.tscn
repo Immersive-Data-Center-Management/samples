@@ -1,0 +1,209 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/task_state.gd" id="1_s"]
+[ext_resource type="Script" path="res://addons/sample_framework_core/orbit_controller.gd" id="2_cam"]
+[ext_resource type="Script" path="res://addons/sample_framework_core/stage_selection.gd" id="3_sel"]
+[ext_resource type="Theme" path="res://ui/primary_button.tres" id="primary_theme"]
+
+[sub_resource type="Environment" id="Env_task"]
+background_mode = 1
+background_color = Color(0.055, 0.08, 0.095, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.45
+
+[sub_resource type="World3D" id="World_task"]
+environment = SubResource("Env_task")
+
+[sub_resource type="StandardMaterial3D" id="Mark"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.96, 0.65, 0.14, 0.6)
+
+[sub_resource type="StyleBoxFlat" id="Ticket"]
+bg_color = Color(0.133, 0.188, 0.231, 1)
+border_width_left = 8
+border_color = Color(0.96, 0.65, 0.14, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 24.0
+content_margin_top = 16.0
+content_margin_right = 20.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="Role"]
+bg_color = Color(0.173, 0.212, 0.251, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+content_margin_left = 16.0
+content_margin_top = 6.0
+content_margin_right = 16.0
+content_margin_bottom = 6.0
+
+[node name="Task" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_s")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.09, 0.12, 0.15, 1)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 72
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TopRow" type="HBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+
+[node name="RoleLabel" type="Label" parent="Margin/VBox/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("Role")
+text = "👷 You are: Technician"
+
+[node name="RefreshButton" type="Button" parent="Margin/VBox/TopRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_horizontal = 10
+tooltip_text = "Refresh"
+theme_override_font_sizes/font_size = 32
+text = "⟳"
+
+[node name="Ticket" type="PanelContainer" parent="Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("Ticket")
+
+[node name="TicketBox" type="VBoxContainer" parent="Margin/VBox/Ticket"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SourceLabel" type="Label" parent="Margin/VBox/Ticket/TicketBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.64, 0.68, 1)
+theme_override_font_sizes/font_size = 20
+text = "Service ticket · from the monitoring (demo data)"
+autowrap_mode = 3
+
+[node name="TitleLabel" type="Label" parent="Margin/VBox/Ticket/TicketBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = ""
+autowrap_mode = 3
+
+[node name="DetailLabel" type="Label" parent="Margin/VBox/Ticket/TicketBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.84, 0.87, 1)
+theme_override_font_sizes/font_size = 24
+text = ""
+autowrap_mode = 3
+
+[node name="StatusLabel" type="Label" parent="Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Busy" type="ProgressBar" parent="Margin/VBox"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+show_percentage = false
+indeterminate = true
+
+[node name="ViewerContainer" type="SubViewportContainer" parent="Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+stretch = true
+
+[node name="Viewer" type="SubViewport" parent="Margin/VBox/ViewerContainer"]
+own_world_3d = true
+world_3d = SubResource("World_task")
+handle_input_locally = false
+size = Vector2i(656, 600)
+render_target_update_mode = 4
+
+[node name="Camera" type="Camera3D" parent="Margin/VBox/ViewerContainer/Viewer"]
+current = true
+
+[node name="OrbitController" type="Node" parent="Margin/VBox/ViewerContainer/Viewer/Camera"]
+script = ExtResource("2_cam")
+min_distance = 0.3
+
+[node name="HeadLight" type="DirectionalLight3D" parent="Margin/VBox/ViewerContainer/Viewer/Camera"]
+
+[node name="UsdStageNode3D" type="UsdStageNode3D" parent="Margin/VBox/ViewerContainer/Viewer"]
+
+[node name="StageSelection" type="Node" parent="Margin/VBox/ViewerContainer/Viewer" node_paths=PackedStringArray("stage")]
+script = ExtResource("3_sel")
+stage = NodePath("../UsdStageNode3D")
+highlight_material = SubResource("Mark")
+pick_on_click = false
+
+[node name="ViewerHint" type="Label" parent="Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.64, 0.68, 1)
+theme_override_font_sizes/font_size = 20
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CheckButton" type="Button" parent="Margin/VBox"]
+theme = ExtResource("primary_theme")
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Go to the rack and scan"
+
+[node name="ReportButton" type="Button" parent="Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Last report"
+
+[node name="ReportLabel" type="Label" parent="Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bq8n5mh3k2qax"]
 
 [ext_resource type="Script" uid="uid://cb2nb6nbnb5mh" path="res://scripts/ui/scene_tree_view.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/ui/floating_panel.tscn" id="1_base"]
+[ext_resource type="PackedScene" path="res://addons/sample_framework_core/ui/floating_panel.tscn" id="1_base"]
 
 [node name="SceneTreeView" unique_id=1760802359 instance=ExtResource("1_base")]
 offset_right = 300.0

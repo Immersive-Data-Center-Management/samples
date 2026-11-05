@@ -1,0 +1,58 @@
+[configuration]
+
+entry_symbol = "idtxflow_library_init"
+compatibility_minimum = "4.5"
+
+[libraries]
+; Relative paths ensure that our GDExtension can be placed anywhere in the project directory.
+windows.arm64.single.debug = "./bin/windows/libidtxflow.windows.template_debug.arm64.dll"
+windows.arm64.double.debug = "./bin/windows/libidtxflow.windows.template_debug.arm64.double.dll"
+windows.arm64.single.release = "./bin/windows/libidtxflow.windows.template_release.arm64.dll"
+windows.arm64.double.release = "./bin/windows/libidtxflow.windows.template_release.arm64.double.dll"
+
+windows.x86_64.single.debug = "./bin/windows/libidtxflow.windows.template_debug.x86_64.dll"
+windows.x86_64.double.debug = "./bin/windows/libidtxflow.windows.template_debug.x86_64.double.dll"
+windows.x86_64.single.release = "./bin/windows/libidtxflow.windows.template_release.x86_64.dll"
+windows.x86_64.double.release = "./bin/windows/libidtxflow.windows.template_release.x86_64.double.dll"
+
+macos.arm64.single.debug = "./bin/macos/libidtxflow.macos.template_debug.arm64.dylib"
+macos.arm64.double.debug = "./bin/macos/libidtxflow.macos.template_debug.arm64.double.dylib"
+macos.arm64.single.release = "./bin/macos/libidtxflow.macos.template_release.arm64.dylib"
+macos.arm64.double.release = "./bin/macos/libidtxflow.macos.template_release.arm64.double.dylib"
+
+android.arm64.debug = "./bin/android/libidtxflow.android.template_debug.arm64.so"
+android.arm64.release = "./bin/android/libidtxflow.android.template_release.arm64.so"
+
+[dependencies]
+
+android.arm64 = {
+    "./bin/android/libidtx_usd.so":"",
+    "./bin/android/libtbb.so":"",
+    "./bin/android/libusd_ms.so":""
+}
+
+windows.x86_64 = {
+    "./bin/windows/usd_ms.dll":"",
+    "./bin/windows/libidtx_usd.dll":"",
+    "./bin/windows/tbb12.dll":"",
+    "./bin/windows/libmdl_core.dll":"",
+    "./bin/windows/libmdl_sdk.dll":"",
+    "./bin/windows/dds.dll":"",
+    "./bin/windows/nv_openimageio.dll":"",
+    "./bin/windows/mdl_distiller.dll":"",
+    "./bin/windows/usd":"",
+    "./bin/plugin":""
+}
+
+macos = {
+    "./bin/macos/libusd_ms.dylib":"",
+    "./bin/macos/libidtx_usd.dylib":"",
+    "./bin/macos/libtbb.12.dylib":"",
+    "./bin/macos/libmdl_core.so":"",
+    "./bin/macos/libmdl_sdk.so":"",
+    "./bin/macos/dds.so":"",
+    "./bin/macos/nv_openimageio.so":"",
+    "./bin/macos/mdl_distiller.so":"",
+    "./bin/macos/usd":"",
+    "./bin/plugin":""
+}

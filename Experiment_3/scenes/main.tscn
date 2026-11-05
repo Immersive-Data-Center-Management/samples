@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://cqmgt6ut6xsrr"]
+
+[ext_resource type="PackedScene" uid="uid://cmy4hgkgrnss4" path="res://addons/sample_framework_ar/XRSetup.tscn" id="1_main"]
+[ext_resource type="Script" uid="uid://dhdnpcxc7j5fw" path="res://addons/sample_framework_core/flow/state_manager.gd" id="2_sugp2"]
+[ext_resource type="PackedScene" uid="uid://bwwy8ors20jyv" path="res://scenes/ar_view_state.tscn" id="5_tbgi4"]
+
+[node name="Node3D" type="Node3D" unique_id=1264467992]
+
+[node name="XRSetup" parent="." unique_id=1477113110 instance=ExtResource("1_main")]
+enabled_features = 1
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1276508120]
+transform = Transform3D(0.988544, -0.09485824, 0.11739969, 0, 0.7778265, 0.62847906, -0.15093301, -0.6212792, 0.7689157, 0, 3.1212444, 0)
+light_energy = 0.666
+
+[node name="StateManager" type="Node" parent="." unique_id=824770417 node_paths=PackedStringArray("start_state")]
+script = ExtResource("2_sugp2")
+start_state = NodePath("ArViewState")
+
+[node name="ArViewState" parent="StateManager" unique_id=1841784453 instance=ExtResource("5_tbgi4")]
+visible = false

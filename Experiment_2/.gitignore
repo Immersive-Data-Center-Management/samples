@@ -1,0 +1,7 @@
+.godot/
+/android/
+/[Bb]uild/
+/[Bb]uilds/
+/BUILDS/
+# set up by bootstrap.ps1 (IDTXFlow download, links to shared/addons)
+addons/

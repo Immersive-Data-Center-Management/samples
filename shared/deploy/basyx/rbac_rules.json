@@ -1,0 +1,63 @@
+[
+  {
+    "role": "admin",
+    "action": ["CREATE", "READ", "UPDATE", "DELETE"],
+    "targetInformation": {
+      "@type": "aas",
+      "aasIds": "*"
+    }
+  },
+  {
+    "role": "admin",
+    "action": ["CREATE", "READ", "UPDATE", "DELETE"],
+    "targetInformation": {
+      "@type": "submodel",
+      "submodelIds": "*",
+      "submodelElementIdShortPaths": "*"
+    }
+  },
+  {
+    "role": "admin",
+    "action": ["CREATE", "READ", "UPDATE", "DELETE"],
+    "targetInformation": {
+      "@type": "concept-description",
+      "conceptDescriptionIds": "*"
+    }
+  },
+  {
+    "role": "admin",
+    "action": ["CREATE", "READ", "UPDATE", "DELETE"],
+    "targetInformation": {
+      "@type": "aas-environment",
+      "aasIds": "*",
+      "submodelIds": "*",
+      "conceptDescriptionIds": "*"
+    }
+    },
+  {
+    "role": "technician",
+    "action": ["READ"],
+    "targetInformation": {
+      "@type": "aas",
+      "aasIds": "*"
+    }
+  },
+  {
+    "role": "technician",
+    "action": ["READ"],
+    "targetInformation": {
+      "@type": "submodel",
+      "submodelIds": "*",
+      "submodelElementIdShortPaths": "*"
+    }
+  },
+  {
+    "role": "technician",
+    "action": ["UPDATE"],
+    "targetInformation": {
+      "@type": "submodel",
+      "submodelIds": "*",
+      "submodelElementIdShortPaths": "LastInspection"
+    }
+  }
+]

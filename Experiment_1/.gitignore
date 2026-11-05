@@ -1,13 +1,5 @@
-.venv/
 .godot/
 tmp/
-*.obj
-*.pdb
-*.os
-*.import
-__pycache__/
-*.pyc
-opencode.generated.json
 **/~lib*
-deploy/.env
-addons/IDTXFlow/
+# set up by bootstrap.ps1 (IDTXFlow download, links to shared/addons)
+addons/

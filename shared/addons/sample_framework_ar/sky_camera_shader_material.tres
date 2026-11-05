@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://doxtt21b6fjb"]
+
+[ext_resource type="Shader" path="res://addons/sample_framework_ar/Camera.gdshader" id="1_iiff2"]
+
+[resource]
+shader = ExtResource("1_iiff2")
+shader_parameter/viewport_size = Vector2(512, 512)
