@@ -16,7 +16,7 @@ experiment needs into its own `addons/` folder, so the experiments stay small an
 | [`addons/sample_framework_aas/`](addons/sample_framework_aas/) | AAS (BaSyx) REST client, Keycloak login, rack → USD session layer | Exp 1, 2 |
 | [`addons/sample_framework_ar/`](addons/sample_framework_ar/) | AR rig and components on top of the ARCore plugin | Exp 2, 3 |
 | [`addons/ARCorePlugin/`](addons/ARCorePlugin/) | The built ARCore Android plugin (`.aar`) and its GDScript wrapper | Exp 2, 3 |
-| [`arcore_extension/`](arcore_extension/README.md) | C++/Kotlin source and Gradle build of the ARCore plugin | – |
+| [`arcore_extension/`](arcore_extension_patches/README.md) | C++/Kotlin source of the ARCore plugin: upstream as a git submodule, our changes as patches in `arcore_extension_patches/` | – |
 | [`idtxflow_android/`](idtxflow_android/) | IDTXFlow 0.6.0 Android arm64 binaries, copied into `addons/IDTXFlow` by `bootstrap.ps1 -Android`. Temporary: not in the public IDTXFlow release yet. Not an addon of its own. | Exp 2, 3 |
 | [`deploy/`](deploy/README.md) | Demo backend: Keycloak + Eclipse BaSyx + asset server, seed data, live-data simulator | Exp 1, 2 |
 | [`tools/`](tools/) | Blender scripts to shrink high-poly USD meshes | – |
@@ -157,8 +157,8 @@ junctions; create symlinks (`ln -s ../../shared/addons/sample_framework_core add
 ## The ARCore plugin
 
 `addons/ARCorePlugin/bin/` holds the built `.aar` files, so the experiments run without an Android build setup.
-Rebuild them only after changing the native code in [`arcore_extension/`](arcore_extension/README.md#build):
-`./gradlew assemble` there assembles the complete addon in `plugin/demo/addons/ARCorePlugin/`, which you copy over
-`addons/ARCorePlugin/`. The wrapper `ARCoreInterface.gd` exists twice: edit
+To build them yourself, for example after changing the plugin, follow
+[`arcore_extension_patches/README.md`](arcore_extension_patches/README.md#build): `arcore_extension/` is a git submodule
+of the upstream plugin, and our changes are patches applied by a script. The wrapper `ARCoreInterface.gd` exists twice: edit
 `arcore_extension/plugin/export_scripts_template/ARCoreInterface.gd`, the copy in `addons/ARCorePlugin/` is overwritten
 by the next build.
