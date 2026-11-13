@@ -83,7 +83,9 @@ layout and build in detail.
 `apply.ps1` puts the patches as commits on the local branch `samples` in the submodule. Change the code there and
 commit in the submodule: a new commit becomes a new patch, `git commit --amend` changes the last one. Then run
 `.\shared\arcore_extension_patches\export.ps1`, which rewrites the `*.patch` files from these commits, and commit them in
-the samples repository. The submodule pointer itself stays on the upstream commit (`.gitmodules` has `ignore = all`).
+the samples repository. The submodule pointer itself stays on the upstream commit: `.gitmodules` has `ignore = all`, so
+`git add -A` and `git commit -a` skip it, but **never `git add shared/arcore_extension`** explicitly, that would record
+our local patch commits, which exist nowhere else. Both scripts stop with a message if that happened.
 
 `apply.ps1` rebuilds the branch `samples` from the patches: it discards uncommitted changes and commits that are not
 exported yet. So export first.

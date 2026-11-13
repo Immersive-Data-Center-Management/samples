@@ -12,6 +12,10 @@ function Run { & git @args; if ($LASTEXITCODE) { throw "git $args failed" } }
 
 Run -C $root submodule update --init shared/arcore_extension
 $pin = (git -C $root ls-files -s shared/arcore_extension).Split()[1]   # pinned upstream commit
+# Must be an upstream commit. An explicit `git add shared/arcore_extension` records our local patch commits instead.
+if (-not (git -C $sub branch -r --contains $pin)) {
+    throw "The submodule pointer $pin is not an upstream commit (was the submodule staged with git add?). Reset it to the upstream commit the patches are based on: git update-index --cacheinfo 160000,<commit>,shared/arcore_extension"
+}
 
 # Keep the repository's line endings (LF), otherwise the patches don't apply on Windows.
 Run -C $sub config core.autocrlf false
