@@ -37,6 +37,12 @@ layout_mode = 2
 text = ""
 horizontal_alignment = 1
 
+[node name="SourceLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.7, 0.75, 1)
+text = ""
+autowrap_mode = 3
+
 [node name="ItemList" type="ItemList" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3

@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://cmy4hgkgrnss4"]
+
+[ext_resource type="Script" uid="uid://c27g0h2u5d2g0" path="res://addons/sample_framework_ar/InitARCore.gd" id="1_xrsetup"]
+[ext_resource type="Material" uid="uid://doxtt21b6fjb" path="res://addons/sample_framework_ar/sky_camera_shader_material.tres" id="2_xrsetup"]
+[ext_resource type="Script" uid="uid://ck52alc67ma08" path="res://addons/sample_framework_ar/ar_inspect_camera.gd" id="3_xrsetup"]
+[ext_resource type="Script" uid="uid://dbocq04xsta26" path="res://addons/sample_framework_core/object_picker.gd" id="4_xrsetup"]
+
+[sub_resource type="Sky" id="Sky_xrsetup"]
+sky_material = ExtResource("2_xrsetup")
+
+[sub_resource type="Environment" id="Env_xrsetup"]
+background_mode = 2
+sky = SubResource("Sky_xrsetup")
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.1
+
+[node name="XRSetup" type="Node3D" unique_id=1345643467]
+script = ExtResource("1_xrsetup")
+
+[node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=940165515]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=1127018784]
+environment = SubResource("Env_xrsetup")
+far = 20.0
+script = ExtResource("3_xrsetup")
+zoom_recenter_strength = 0.754
+
+[node name="ObjectPicker" type="Node3D" parent="XROrigin3D/XRCamera3D" unique_id=1127018785]
+script = ExtResource("4_xrsetup")

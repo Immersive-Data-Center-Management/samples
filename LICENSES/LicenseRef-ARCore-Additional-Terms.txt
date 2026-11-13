@@ -1,0 +1,16 @@
+ARCore Additional Terms of Service
+
+Google's ARCore SDK (the C API header arcore_c_api.h and the native ARCore libraries
+packaged into the ARCorePlugin .aar files) is licensed under the ARCore Additional Terms of
+Service together with the Google APIs Terms of Service. It is not covered by the license of
+this repository.
+
+The current terms are published by Google at:
+
+  ARCore Additional Terms of Service: https://developers.google.com/ar/develop/terms
+  Google APIs Terms of Service:       https://developers.google.com/terms
+
+Among other things, the terms require apps that use ARCore to tell their end users that the
+app includes ARCore functionality provided by Google, and that its use is subject to the
+Google Terms of Service (https://policies.google.com/terms) and the Google Privacy Policy
+(https://google.com/policies/privacy). Read the full terms before you ship an app.

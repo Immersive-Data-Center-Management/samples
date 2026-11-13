@@ -1,0 +1,4 @@
+[submodule "shared/arcore_extension"]
+	path = shared/arcore_extension
+	url = https://github.com/tGautot/godot_arcore.git
+	ignore = all

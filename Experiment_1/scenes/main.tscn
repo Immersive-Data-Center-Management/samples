@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://addons/sample_framework_core/flow/state_manager.gd" id="2_sm"]
+[ext_resource type="PackedScene" uid="uid://g4m0hhim3kcu" path="res://scenes/screens/login_screen.tscn" id="3_login"]
+[ext_resource type="PackedScene" path="res://scenes/screens/item_list_screen.tscn" id="4_list"]
+[ext_resource type="PackedScene" uid="uid://bmco312tahn5m" path="res://scenes/screens/viewer_3d.tscn" id="5_viewer"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+
+[node name="StateManager" type="Node" parent="." node_paths=PackedStringArray("start_state")]
+script = ExtResource("2_sm")
+start_state = NodePath("Login")
+
+[node name="Login" parent="StateManager" node_paths=PackedStringArray("next_state") instance=ExtResource("3_login")]
+next_state = NodePath("../Racks")
+
+[node name="Racks" parent="StateManager" node_paths=PackedStringArray("next_state", "login_state") instance=ExtResource("4_list")]
+next_state = NodePath("../Viewer")
+login_state = NodePath("../Login")
+
+[node name="Viewer" parent="StateManager" node_paths=PackedStringArray("next_state") instance=ExtResource("5_viewer")]
+next_state = NodePath("../Racks")

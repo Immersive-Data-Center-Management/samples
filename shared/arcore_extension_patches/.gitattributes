@@ -1,0 +1,3 @@
+# git am needs the patches byte-exact. With core.autocrlf=true they would be checked out with CRLF.
+# shortcut: a patched file with CRLF content (e.g. a .bat) would lose its CRs here; use -text then.
+*.patch text eol=lf

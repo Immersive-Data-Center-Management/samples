@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bhaoycjbu2aln"]
 
-[ext_resource type="PackedScene" path="res://scenes/ui/floating_panel.tscn" id="1_base"]
+[ext_resource type="PackedScene" path="res://addons/sample_framework_core/ui/floating_panel.tscn" id="1_base"]
+[ext_resource type="Script" path="res://addons/sample_framework_core/ui/property_list.gd" id="pl_list"]
 [ext_resource type="Script" uid="uid://ir0y805x73qa" path="res://scripts/ui/data_inspector.gd" id="1_cipow"]
 
 [node name="DataInspector" unique_id=516332008 instance=ExtResource("1_base")]
@@ -37,6 +38,7 @@ size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
 [node name="Rows" type="VBoxContainer" parent="Panel/VBox/Content/VBox/Scroll" index="0" unique_id=1328768407]
+script = ExtResource("pl_list")
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3

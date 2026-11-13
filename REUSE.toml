@@ -9,3 +9,62 @@ path = "**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 SAP SE or an SAP affiliate company and samples contributors"
 SPDX-License-Identifier = "Apache-2.0"
+
+# Third-party code and binaries shipped in this repository (precedence "override": these
+# files are not SAP's, so the catch-all annotation above must not apply to them).
+
+[[annotations]]
+path = ["shared/arcore_extension/**", "shared/addons/ARCorePlugin/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2023 Fredia Huya-Kouadio, Godot Engine contributors and samples contributors"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "shared/arcore_extension/godot-cpp/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2017-present Godot Engine contributors"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+# Gradle wrapper (Gradle 8.9), unchanged
+path = ["shared/arcore_extension/gradlew", "shared/arcore_extension/gradlew.bat", "shared/arcore_extension/gradle/wrapper/gradle-wrapper.jar"]
+precedence = "override"
+SPDX-FileCopyrightText = "2015 the original author or authors (Gradle)"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+# ARCore C API header, copied unchanged from google-ar/arcore-android-sdk 1.57.0
+path = "shared/arcore_extension/plugin/src/main/cpp/include/arcore_c_api.h"
+precedence = "override"
+SPDX-FileCopyrightText = "2017 Google LLC"
+SPDX-License-Identifier = "LicenseRef-ARCore-Additional-Terms"
+
+[[annotations]]
+# Built plugin: the MIT plugin code and godot-cpp, plus Google's ARCore SDK native libraries
+# (jni/arm64-v8a/libarcore_sdk_c.so, libarcore_sdk_jni.so)
+path = "shared/addons/ARCorePlugin/bin/**"
+precedence = "override"
+SPDX-FileCopyrightText = ["2023 Fredia Huya-Kouadio, Godot Engine contributors and samples contributors", "2017 Google LLC"]
+SPDX-License-Identifier = "MIT AND LicenseRef-ARCore-Additional-Terms"
+
+[[annotations]]
+# IDTXFlow Android build; bundled third-party licenses are in LICENSES-THIRD-PARTY/
+path = "shared/idtxflow_android/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 SAP SE or an SAP affiliate company and idtx-flow contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+# Intel oneTBB, bundled with the IDTXFlow Android build
+path = "shared/idtxflow_android/bin/android/libtbb.so"
+precedence = "override"
+SPDX-FileCopyrightText = "Intel Corporation"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+# OpenUSD (monolithic library and its plugin resources), bundled with the IDTXFlow Android build.
+# Notices of the libraries OpenUSD itself bundles: LICENSES-THIRD-PARTY/openusd-LICENSE.txt
+path = ["shared/idtxflow_android/bin/android/libusd_ms.so", "shared/idtxflow_android/bin/android/usd/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "Pixar and the OpenUSD contributors"
+SPDX-License-Identifier = "LicenseRef-TOST-1.0"

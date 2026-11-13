@@ -1,0 +1,145 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/inspect_state.gd" id="1_s"]
+[ext_resource type="Script" path="res://addons/sample_framework_core/ui/property_list.gd" id="pl_list"]
+
+[node name="Inspect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_s")
+mouse_filter = 2
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchor_top = 0.45
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.09, 0.12, 0.15, 1)
+
+[node name="NoCameraLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 0.45
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 24
+text = "No camera on desktop.
+Take photo saves this view."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="UI" type="PanelContainer" parent="."]
+layout_mode = 1
+anchor_top = 0.45
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Margin" type="MarginContainer" parent="UI"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="UI/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 0
+
+[node name="TitleLabel" type="Label" parent="UI/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="TaskLabel" type="Label" parent="UI/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Right part found. Check it, take a photo and send your report."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="DataHeading" type="Label" parent="UI/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.68, 0.74, 1)
+theme_override_font_sizes/font_size = 20
+text = "Data from the AAS (live values update every 3 s)"
+autowrap_mode = 3
+
+[node name="Data" type="VBoxContainer" parent="UI/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 0
+script = ExtResource("pl_list")
+font_size = 22
+
+[node name="FindingHeading" type="Label" parent="UI/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.68, 0.74, 1)
+theme_override_font_sizes/font_size = 20
+text = "Select the observed behavior:"
+autowrap_mode = 3
+
+[node name="Finding" type="OptionButton" parent="UI/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+
+[node name="PhotoRow" type="HBoxContainer" parent="UI/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PhotoButton" type="Button" parent="UI/Margin/VBox/PhotoRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+text = "Take photo"
+
+[node name="Photo" type="TextureRect" parent="UI/Margin/VBox/PhotoRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SendButton" type="Button" parent="UI/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Send report"
+
+[node name="StatusLabel" type="Label" parent="UI/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
+
+[node name="Flash" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
